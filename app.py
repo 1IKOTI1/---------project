@@ -17,7 +17,7 @@ def get_prizes():
         'prazes': prizes
     })
     
-@app.route('/api/play', methost=['POST'])
+@app.route('/api/play', methods=['POST'])
 def play():
     data = request.get_json()
     nickname = data.get('nackname')
