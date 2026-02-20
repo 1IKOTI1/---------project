@@ -69,6 +69,25 @@ def  get_winners():
              for w in winners
         ]
     }) 
+ 
+@app.route('/')
+def index():
+    app.logger.info("Кто-то зашел на главную страницу")
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        app.logger.error(f"Ошибка при рендеринге шаблона: {e}")
+        return f"Ошибка: {e}", 500
+
+@app.route('/api/prizes')
+def get_prizes():
+    app.logger.info("Запрос списка призов")
+    try:
+        prizes = db.get_available_prizes()
+        return jsonify({'success': True, 'prizes': prizes})
+    except Exception as e:
+        app.logger.error(f"Ошибка при получении призов: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500   
     
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
