@@ -37,13 +37,13 @@ class RaffleGame{
             return;
         }
 
-        prizes.forEach(prizes => {
+        prizes.forEach(prize => {
             const card = document.createElement('div');
             card.className = 'prize-card';
             card.innerHTML = `
-                 <img src="/static/images/${prizes.image}" alt="${prizes.name}">
-                 <h3>${prizes.name}</h3>
-                 <p>${prizes.description || ''}</p>
+                 <img src="/static/images/${prize.image}" alt="${prize.name}">
+                 <h3>${prize.name}</h3>
+                 <p>${prize.description || ''}</p>
                  `;
                  this.prizesGrid.appendChild(card);
                 });             
