@@ -1,4 +1,4 @@
-from flask import Flask, render_temate, jsonify, request
+from flask import Flask, render_template, jsonify, request
 from database import RaffleDatabase
 import os
 
@@ -7,7 +7,7 @@ db = RaffleDatabase()
 
 @app.route('/')
 def index():
-    return render_tenplate('index.html')
+    return render_template('index.html')
 
 @app.route('/api/prizes')
 def get_prizes():
