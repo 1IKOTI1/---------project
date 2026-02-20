@@ -52,7 +52,7 @@ class RaffleDatabase:
                  with self.get_connection() as conn:
                      cursor = conn.cursor()
                      cursor.execute(
-                         "SELECT id, name, image, description FROM prizes WHERE available = 1"
+                         "SELECT id, name, image, description FROM prizes WHERE availble = 1"
                      )      
                      prizes = cursor.fetchall()
                      return [
@@ -93,16 +93,16 @@ class RaffleDatabase:
                          prize = cursor.fetchone()
                          
                          if not prize:
-                             conn.rollblack()
+                             conn.rollback()
                              return {'success': False, 'massage': 'Все призы выданы'}
                          
                          cursor.execute(
-                             "UPDATE prazes SET available = 0 WHERE id = ?",
+                             "UPDATE prizes SET available = 0 WHERE id = ?",
                              (prize[0],)
                          )
                          
                          cursor.execute(
-                             "INSERET INFO winners (nickname, prize_id) VALUES (?, ?)",
+                             "INSERET INTO winners (nickname, prize_id) VALUES (?, ?)",
                              (nickname, prize[0])
                          )
                          
@@ -143,7 +143,7 @@ class RaffleDatabase:
                          
                          
                          
-                                 
+                                
                    
         
         
