@@ -58,7 +58,7 @@ class RaffleDatabase:
                              'id': p[0],
                              'name': p[1],
                              'image': p[2],
-                             "descrition": p[3]
+                             "description": p[3]
                                                          
                          }
                          for p in prizes
