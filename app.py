@@ -70,7 +70,7 @@ def  get_winners():
         ]
     }) 
  
-@app.route('/')
+@app.route('//')
 def index():
     app.logger.info("Кто-то зашел на главную страницу")
     try:
