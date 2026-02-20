@@ -1,4 +1,4 @@
-from flask import Flask, render_tenplate, jsonify, request
+from flask import Flask, render_temate, jsonify, request
 from database import RaffleDatabase
 import os
 
