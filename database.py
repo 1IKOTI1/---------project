@@ -37,12 +37,12 @@ class RaffleDatabase:
                 
                 if count == 0:
                     default_prizes = [
-                        ('cart 1', 'card 2', 'card 3', ),
-                        ('cart 4', 'card 5', 'card 6', ),
-                        ('cart 7', 'card 8', 'card 9', ),
+                        ('cart 1', 'card.png.web', ),
+                        ('cart 4', 'card 5', ),
+                        ('cart 7', 'card 8', ),
                     ]
                     cursor.executemany(
-                        "INSERT INTO prizes (name, image, description) VALUES (?,?,?)",
+                        "INSERT INTO prizes (name, image,) VALUES (?,?)",
                         default_prizes
                     
                     )
