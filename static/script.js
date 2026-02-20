@@ -41,7 +41,7 @@ class RaffleGame{
             const card = document.createElement('div');
             card.className = 'prize-card';
             card.innerHTML = `
-                 <img scr="/static/images/${prizes.image}" alt="${prizes.name}">
+                 <img src="/static/images/${prizes.image}" alt="${prizes.name}">
                  <h3>${prizes.name}</h3>
                  <p>${prizes.description || ''}</p>
                  `;
@@ -64,7 +64,7 @@ class RaffleGame{
             const response = await fetch('/api/play',{
                 method: 'POST',
                 headers: {
-                    'Content-Tapy': 'application/json',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({nickname: nickname})
             });
@@ -88,7 +88,7 @@ class RaffleGame{
 
     showMessage(text, type){
         this.messageDiv.textContent = text;
-        this.messageDiv.className = 'message message-${type}';
+        this.messageDiv.className = `message message-${type}`;
     }
 }
 
