@@ -45,7 +45,7 @@ class RaffleDatabase:
                     ('Супер-приз', 'gift.png')
                 ]
                 cursor.executemany(
-                    "INSERT INTO prizes (name, image, description) VALUES (?, ?,)",
+                    "INSERT INTO prizes (name, image) VALUES (?, ?)",
                     default_prizes
                 )
                 conn.commit()
