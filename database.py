@@ -11,7 +11,7 @@ class RaffleDatabase:
         
     def init_database(self):
             with self.get_connection() as cann:
-                cursor = conn.cursor()
+                cursor = cann.cursor()
                 
                 cursor.execute('''
                                CREATE TABLE IF NOT EXISTS prizes(
@@ -44,7 +44,7 @@ class RaffleDatabase:
                         default_prizes
                     
                     )
-                    conn.commit()
+                    cann.commit()
                     
     def get_available_prizes(self):
                  with self.get_connection() as conn:
