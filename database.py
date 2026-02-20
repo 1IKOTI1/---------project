@@ -43,9 +43,9 @@ class RaffleDatabase:
             if count == 0:
                 default_prizes = [
                     ('сard', 'card.png.webp'),
-                    ('сard', 'tshirt.png',),
-                    ('сard', 'tshirt.png',),
-                    ('card', 'tshirt.png',),
+                    ('сard', 'tshirt.png'),
+                    ('сard', 'tshirt.png'),
+                    ('card', 'tshirt.png'),
                     
                 ]
                 cursor.executemany(
