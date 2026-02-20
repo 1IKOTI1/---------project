@@ -52,7 +52,7 @@ class RaffleDatabase:
                  with self.get_connection() as conn:
                      cursor = conn.cursor()
                      cursor.execute(
-                         "SELECT id, name, image, description FROM prizes available = 1"
+                         "SELECT id, name, image, description FROM prizes WHERE available = 1"
                      )      
                      prizes = cursor.fetcall()
                      return [
