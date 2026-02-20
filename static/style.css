@@ -87,6 +87,7 @@ h1 {
     margin: 20px 0;
     padding: 15px;
     border-radius: 10px;
+    display: block;
 }
 
 .message-success {

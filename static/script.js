@@ -87,8 +87,10 @@ class RaffleGame{
     }
 
     showMessage(text, type){
+        console.log(`Показываю сообщение: ${text}, тип: ${type}`);
         this.messageDiv.textContent = text;
         this.messageDiv.className = `message message-${type}`;
+        this.messageDiv.style.display = 'block';
     }
 }
 
