@@ -54,7 +54,7 @@ class RaffleDatabase:
                      cursor.execute(
                          "SELECT id, name, image, description FROM prizes WHERE available = 1"
                      )      
-                     prizes = cursor.fetcall()
+                     prizes = cursor.fetchall()
                      return [
                          {
                              'id': p[0],
