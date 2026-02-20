@@ -37,7 +37,7 @@ class RaffleDatabase:
                 
                 if count == 0:
                     default_prizes = [
-                        ('cart 1', 'card.png.', ),
+                        ('cart 1', 'card.png.webp', ),
                         ('cart 4', 'card 5', ),
                         ('cart 7', 'card 8', ),
                     ]
