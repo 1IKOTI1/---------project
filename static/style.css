@@ -1,0 +1,160 @@
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+    color: #ffffff;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Контейнер для всего контента */
+.container {
+    max-width: 1200px;
+    width: 100%;
+}
+
+/* Заголовок */
+h1 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Блок с полем ввода и кнопкой */
+.controls {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 50px;
+    padding: 10px 20px;
+    margin: 30px auto;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    max-width: 500px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#nicknameInput {
+    flex-grow: 1;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 1.1em;
+    outline: none;
+    border: 1px solid transparent;
+    transition: 0.3s;
+}
+
+#nicknameInput:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+#playButton {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(45deg, #00ffff, #0088ff);
+    color: #1e1e2f;
+    font-weight: bold;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#playButton:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+}
+
+#playButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Сообщение об ошибке или результате */
+#message {
+    text-align: center;
+    min-height: 60px;
+    font-size: 1.2em;
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.message-success {
+    background: rgba(0, 255, 0, 0.2);
+    border: 1px solid #00ff00;
+}
+
+.message-error {
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid #ff0000;
+}
+
+.message-info {
+    background: rgba(255, 255, 0, 0.2);
+    border: 1px solid #ffff00;
+}
+
+/* Сетка с карточками призов */
+.prizes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+    padding: 20px;
+}
+
+/* Карточка приза */
+.prize-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.prize-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+    border-color: #00ffff;
+}
+
+.prize-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.prize-card h3 {
+    margin: 10px 0;
+    color: #00ffff;
+}
+
+.prize-card p {
+    color: #cccccc;
+    font-size: 0.9em;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.prize-card {
+    animation: fadeIn 0.5s ease-out;
+}

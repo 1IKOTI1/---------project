@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розыгрыш призов</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 Розыгрыш призов 🎁</h1>
+        
+        <div class="controls">
+            <input type="text" 
+                   id="nicknameInput" 
+                   placeholder="Введите ваш никнейм..." 
+                   maxlength="30">
+            <button id="playButton">Забрать приз</button>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <h2>Доступные призы:</h2>
+        <div id="prizesGrid" class="prizes-grid"></div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
