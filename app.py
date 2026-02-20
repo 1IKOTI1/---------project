@@ -1,6 +1,16 @@
 from flask import Flask, render_template, jsonify, request
 from database import RaffleDatabase
 import os
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+
+logging.info("Запуск приложения...")
 
 app = Flask(__name__)
 db = RaffleDatabase()
