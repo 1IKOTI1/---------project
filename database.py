@@ -42,7 +42,7 @@ class RaffleDatabase:
                         ('cart 9', 'card 10', 'card 11', 'card 12'),
                     ]
                     cursor.executemany(
-                        "INSERT INTO prizes (name, description) VALUES (?,?,?)",
+                        "INSERT INTO prizes (name, image, description) VALUES (?,?,?)",
                         default_prizes
                     
                     )
