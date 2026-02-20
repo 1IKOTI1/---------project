@@ -23,7 +23,7 @@ class RaffleDatabase:
                                    )
                                    ''')
                 cursor.execute('''
-                               CREATE TABLE IF EXISTS winners (
+                               CREATE TABLE IF NOT EXISTS winners (
                                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                                    nickname TEXT UNIQUE NOT NULL,
                                    prize_id INTEGER,
