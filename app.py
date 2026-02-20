@@ -60,9 +60,6 @@ def  get_winners():
         ]
     }) 
     
-if __name__=='__main__':
-    app.run(debug=True)
-
 import os  # ← ЭТОТ ИМПОРТ ДОЛЖЕН БЫТЬ ВВЕРХУ ФАЙЛА!
 
 if __name__ == '__main__':
