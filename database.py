@@ -283,9 +283,9 @@ class RaffleDatabase:
                 return {
                     'id': user[0],
                     'nickname': user[1],
-                    'telegram': user[2],
-                    'site_url': user[3],
-                    'shadow_coins': user[4]
+                    'telegram': user[3],
+                    'site_url': user[4],
+                    'shadow_coins': user[5]
                 }
             return None
     
