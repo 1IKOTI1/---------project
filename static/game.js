@@ -7,27 +7,63 @@ class ShadowRaffleGame {
         this.init();
     }
     
-    loadUserFromStorage() {
-        const savedUser = localStorage.getItem('shadowUser');
-        if (savedUser) {
-            try {
-                this.currentUser = JSON.parse(savedUser);
-                console.log('👤 Загружен пользователь:', this.currentUser);
-                document.getElementById('userNickname').textContent = this.currentUser.nickname;
-                document.getElementById('userCoins').textContent = this.currentUser.shadow_coins;
-                
-                // Показываем контакты пользователя
-                const contacts = [];
-                if (this.currentUser.telegram) contacts.push(`📱 ${this.currentUser.telegram}`);
-                if (this.currentUser.site_url) contacts.push(`🔗 ${this.currentUser.site_url}`);
-                document.getElementById('userContacts').textContent = contacts.join(' • ');
-            } catch (e) {
-                console.error('Ошибка загрузки пользователя');
-                window.location.href = '/';
-            }
+    async loadUserFromStorage() {
+    const savedUser = localStorage.getItem('shadowUser');
+    console.log('📦 Данные из localStorage:', savedUser);
+    
+    if (!savedUser) {
+        console.log('❌ Нет сохраненного пользователя');
+        window.location.href = '/';
+        return;
+    }
+    
+    try {
+        const parsedUser = JSON.parse(savedUser);
+        console.log('👤 Пользователь из localStorage:', parsedUser);
+        
+        // ВСЕГДА запрашиваем актуальные данные с сервера
+        console.log('🔄 Запрашиваем актуальные данные с сервера...');
+        const response = await fetch(`/api/user-data?user_id=${parsedUser.id}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            // Используем актуальные данные с сервера
+            this.currentUser = data.user;
+            // Обновляем localStorage
+            localStorage.setItem('shadowUser', JSON.stringify(this.currentUser));
+            console.log('✅ Актуальные данные с сервера:', this.currentUser);
         } else {
-            window.location.href = '/';
+            // Если сервер не отвечает, используем сохраненные данные
+            console.log('⚠️ Сервер недоступен, используем localStorage');
+            this.currentUser = parsedUser;
         }
+        
+        // Обновляем интерфейс
+        this.updateUserDisplay();
+        
+    } catch (error) {
+        console.error('❌ Ошибка загрузки пользователя:', error);
+        // В случае ошибки используем данные из localStorage
+        this.currentUser = JSON.parse(savedUser);
+        this.updateUserDisplay();
+    }
+}
+
+// Добавьте отдельный метод для обновления интерфейса
+    updateUserDisplay() {
+        console.log('🖥️ Обновляем интерфейс с балансом:', this.currentUser.shadow_coins);
+        
+        const nicknameEl = document.getElementById('userNickname');
+        const coinsEl = document.getElementById('userCoins');
+        const contactsEl = document.getElementById('userContacts');
+        
+        if (nicknameEl) nicknameEl.textContent = this.currentUser.nickname;
+        if (coinsEl) coinsEl.textContent = this.currentUser.shadow_coins;
+        
+        const contacts = [];
+        if (this.currentUser.telegram) contacts.push(`📱 ${this.currentUser.telegram}`);
+        if (this.currentUser.site_url) contacts.push(`🔗 ${this.currentUser.site_url}`);
+        if (contactsEl) contactsEl.textContent = contacts.join(' • ');
     }
     
     async init() {
