@@ -38,11 +38,11 @@ class RaffleDatabase:
             
             if count == 0:
                 default_prizes = [
-                    ('Футболка', 'card.png.webp'),
-                    ('Кружка', 'mug.png'),
-                    ('Стикерпак', 'stickers.png'),
-                    ('Скидка 10%', 'discount.png'),
-                    ('Супер-приз', 'gift.png')
+                    ('карточка', 'card.png.webp'),
+                    ('карточка', 'card1.webp'),
+                    ('карточка', 'card2.webp'),
+                    ('карточка', 'card3.webp'),
+                    ('карточка', 'card4.webp')
                 ]
                 cursor.executemany(
                     "INSERT INTO prizes (name, image) VALUES (?, ?)",
