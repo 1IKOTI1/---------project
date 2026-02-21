@@ -326,3 +326,26 @@ h1 {
         font-size: 0.9em;
     }
 }
+
+/* Стили для полей пароля */
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-family: monospace;
+}
+
+/* Индикатор сложности пароля (можно добавить позже) */
+.password-strength {
+    height: 4px;
+    margin-top: 5px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.password-strength.weak { background: #ff4444; width: 33%; }
+.password-strength.medium { background: #ffaa44; width: 66%; }
+.password-strength.strong { background: #44ff44; width: 100%; }

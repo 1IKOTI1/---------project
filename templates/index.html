@@ -73,29 +73,58 @@
     <div class="welcome-container">
         <h1 class="shadow-title">🌑 ТЕНЕВОЙ РОЗЫГРЫШ 🌑</h1>
         
-        <!-- Форма регистрации/входа -->
-        <div class="registration-form">
-            <h2>Вход / Регистрация</h2>
-            
-            <div class="form-group">
-                <label for="nickname">Никнейм (обязательно):</label>
-                <input type="text" id="nickname" placeholder="Введите ваш никнейм" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="telegram">Telegram (@username):</label>
-                <input type="text" id="telegram" placeholder="@username">
-                <small>Или заполните ссылку на сайт</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="siteUrl">Ссылка на профиль:</label>
-                <input type="url" id="siteUrl" placeholder="https://example.com/profile">
-                <small>Или заполните Telegram</small>
-            </div>
-            
-            <button id="registerBtn" class="register-btn">🌑 Войти в тень 🌑</button>
+       <div id="loginForm" class="auth-form active">
+    <div class="registration-form">
+        <h2>Вход в аккаунт</h2>
+        
+        <div class="form-group">
+            <label for="loginNickname">Никнейм</label>
+            <input type="text" id="loginNickname" placeholder="Введите ваш никнейм">
         </div>
+        
+        <div class="form-group">  <!-- НОВОЕ ПОЛЕ -->
+            <label for="loginPassword">Пароль</label>
+            <input type="password" id="loginPassword" placeholder="Введите пароль">
+        </div>
+        
+        <button id="loginBtn" class="register-btn">🔐 Войти</button>
+    </div>
+</div>
+
+<div id="registerForm" class="auth-form">
+    <div class="registration-form">
+        <h2>Регистрация</h2>
+        
+        <div class="form-group">
+            <label for="regNickname">Никнейм (обязательно)</label>
+            <input type="text" id="regNickname" placeholder="Введите никнейм">
+        </div>
+        
+        <div class="form-group">  <!-- НОВОЕ ПОЛЕ -->
+            <label for="regPassword">Пароль (минимум 4 символа)</label>
+            <input type="password" id="regPassword" placeholder="Придумайте пароль">
+        </div>
+        
+        <div class="form-group">  <!-- НОВОЕ ПОЛЕ -->
+            <label for="regConfirmPassword">Подтверждение пароля</label>
+            <input type="password" id="regConfirmPassword" placeholder="Повторите пароль">
+        </div>
+        
+        <div class="form-group">
+            <label for="regTelegram">Telegram (@username)</label>
+            <input type="text" id="regTelegram" placeholder="@username">
+            <small>Или заполните ссылку на сайт</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="regSiteUrl">Ссылка на профиль</label>
+            <input type="url" id="regSiteUrl" placeholder="https://example.com/profile">
+            <small>Или заполните Telegram</small>
+        </div>
+        
+        <button id="registerBtn" class="register-btn">📝 Зарегистрироваться</button>
+    </div>
+</div>
         
         <!-- Публичная таблица победителей -->
         <div class="public-winners">

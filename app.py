@@ -310,6 +310,41 @@ def get_stats_admin():
                 'top_users': top_users
             }
         })
+        
+@app.route('/api/register_with_password', methods=['POST'])
+def register_with_password():
+    """Регистрация с паролем"""
+    data = request.get_json()
+    
+    nickname = data.get('nickname')
+    password = data.get('password')
+    telegram = data.get('telegram')
+    site_url = data.get('site_url')
+    
+    if not nickname:
+        return jsonify({'success': False, 'message': 'Введите никнейм'})
+    
+    if not password or len(password) < 4:
+        return jsonify({'success': False, 'message': 'Пароль должен быть не менее 4 символов'})
+    
+    if not telegram and not site_url:
+        return jsonify({'success': False, 'message': 'Заполните Telegram или ссылку'})
+    
+    result = db.register_with_password(nickname, password, telegram, site_url)
+    return jsonify(result)
+
+@app.route('/api/login_with_password', methods=['POST'])
+def login_with_password():
+    """Вход с паролем"""
+    data = request.get_json()
+    nickname = data.get('nickname')
+    password = data.get('password')
+    
+    if not nickname or not password:
+        return jsonify({'success': False, 'message': 'Введите никнейм и пароль'})
+    
+    result = db.login_with_password(nickname, password)
+    return jsonify(result)        
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))

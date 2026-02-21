@@ -1,8 +1,99 @@
 import sqlite3
 import random
 import json
+import hashlib
+import secrets
 
 class RaffleDatabase:
+    
+    def _hash_password(self, password):
+        salt = secrets.token_hex(16)
+        hash_obj = hashlib.sha256((password + salt).encode())
+        return f"{salt}:{hash_obj.hexdigest()}"
+    
+    def _verify_password(self, password, hashed):
+        if not hashed or ':' not in hashed:
+            return False
+        salt, hash_value = hashed.split(':')
+        hash_obj = hashlib.sha256((password + salt).encode())
+        return hash_obj.hexdigest() == hash_value
+    
+    def register_with_password(self, nickname, password, telegram=None, site_url=None):
+    
+        print(f"📝 Регистрация с паролем: {nickname}")
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Проверяем уникальность
+            if self.check_nickname_exists(nickname):
+                return {'success': False, 'message': 'Никнейм уже занят'}
+            
+            if telegram and self.check_telegram_exists(telegram):
+                return {'success': False, 'message': 'Telegram уже зарегистрирован'}
+            
+            if site_url and self.check_site_url_exists(site_url):
+                return {'success': False, 'message': 'Ссылка уже зарегистрирована'}
+            
+            # Хешируем пароль
+            hashed_password = self._hash_password(password)
+            
+            try:
+                cursor.execute('''
+                    INSERT INTO users (nickname, password, telegram, site_url, shadow_coins)
+                    VALUES (?, ?, ?, ?, 0)
+                ''', (nickname, hashed_password, telegram, site_url))
+                conn.commit()
+                
+                cursor.execute("SELECT * FROM users WHERE nickname = ?", (nickname,))
+                user = cursor.fetchone()
+                
+                return {
+                    'success': True,
+                    'user': {
+                        'id': user[0],
+                        'nickname': user[1],
+                        'telegram': user[3],
+                        'site_url': user[4],
+                        'shadow_coins': user[5]
+                    }
+                }
+            except Exception as e:
+                return {'success': False, 'message': f'Ошибка регистрации: {str(e)}'}
+            
+    def login_with_password(self, nickname, password):
+        """Вход с паролем"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT * FROM users WHERE nickname = ?", (nickname,))
+            user = cursor.fetchone()
+            
+            if not user:
+                return {'success': False, 'message': 'Пользователь не найден'}
+            
+            # Проверяем пароль (user[2] - это поле password)
+            if not self._verify_password(password, user[2]):
+                return {'success': False, 'message': 'Неверный пароль'}
+            
+            # Обновляем время последнего входа
+            cursor.execute(
+                "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE nickname = ?",
+                (nickname,)
+            )
+            conn.commit()
+            
+            return {
+                'success': True,
+                'user': {
+                    'id': user[0],
+                    'nickname': user[1],
+                    'telegram': user[3],
+                    'site_url': user[4],
+                    'shadow_coins': user[5]
+                }
+            }        
+
     def __init__(self, db_name="raffle.db"):
         self.db_name = db_name
         self.init_database()
@@ -19,6 +110,7 @@ class RaffleDatabase:
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nickname TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,  # ← НОВОЕ ПОЛЕ
                     telegram TEXT UNIQUE,
                     site_url TEXT UNIQUE,
                     shadow_coins INTEGER DEFAULT 0,
