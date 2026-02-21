@@ -7,6 +7,26 @@ class ShadowRaffleGame {
         this.init();
     }
     
+    async init() {
+    await this.loadUserFromStorage();  // Ждем загрузки пользователя
+    
+    // Обработка навигации
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            if (e.target.getAttribute('href') === '/logout') {
+                this.logout();
+                e.preventDefault();
+            } else {
+                e.preventDefault();
+                this.loadSection(e.target.getAttribute('data-section'));
+            }
+        });
+    });
+    
+    // Загружаем начальную секцию
+    this.loadSection('game');
+}
+    
     async loadUserFromStorage() {
     const savedUser = localStorage.getItem('shadowUser');
     console.log('📦 Данные из localStorage:', savedUser);
