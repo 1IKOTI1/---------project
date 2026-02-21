@@ -1,351 +1,719 @@
+/* static/style.css - Теневая тема */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
-    color: #ffffff;
+    background: #0a0a0f;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 255, 255, 0.03) 0%, transparent 30%),
+        radial-gradient(circle at 90% 70%, rgba(100, 0, 255, 0.03) 0%, transparent 30%),
+        linear-gradient(135deg, #0a0a0f 0%, #14141f 100%);
+    color: #e0e0e0;
     min-height: 100vh;
-    margin: 0;
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: relative;
 }
 
-/* Контейнер для всего контента */
-.container {
-    max-width: 1200px;
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.01) 0px,
+        rgba(255, 255, 255, 0.01) 2px,
+        transparent 2px,
+        transparent 8px
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Контейнеры */
+.container, .welcome-container, .game-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
     width: 100%;
 }
 
-/* Заголовок */
+.welcome-container {
+    max-width: 600px;
+    margin: 50px auto;
+}
+
+.game-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Заголовки */
 h1 {
     text-align: center;
-    font-size: 2.5em;
-    margin-bottom: 10px;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    font-size: clamp(2em, 5vw, 3.5em);
+    margin-bottom: 30px;
+    color: #ffffff;
+    text-shadow: 
+        0 0 20px rgba(0, 255, 255, 0.3),
+        0 0 40px rgba(0, 255, 255, 0.2),
+        0 0 60px rgba(0, 255, 255, 0.1);
+    letter-spacing: 2px;
+    word-wrap: break-word;
 }
 
-/* Блок с полем ввода и кнопкой */
-.controls {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-    border-radius: 50px;
-    padding: 10px 20px;
-    margin: 30px auto;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    max-width: 500px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-#nicknameInput {
-    flex-grow: 1;
-    padding: 15px 20px;
-    border: none;
-    border-radius: 30px;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    font-size: 1.1em;
-    outline: none;
-    border: 1px solid transparent;
-    transition: 0.3s;
-}
-
-#nicknameInput:focus {
-    border-color: #00ffff;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-}
-
-#playButton {
-    padding: 15px 30px;
-    border: none;
-    border-radius: 30px;
-    background: linear-gradient(45deg, #00ffff, #0088ff);
-    color: #1e1e2f;
-    font-weight: bold;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-#playButton:hover:not(:disabled) {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
-}
-
-#playButton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Сообщение об ошибке или результате */
-#message {
+h2 {
+    font-size: clamp(1.5em, 4vw, 2em);
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
     text-align: center;
-    min-height: 60px;
-    font-size: 1.2em;
-    margin: 20px 0;
-    padding: 15px;
-    border-radius: 10px;
-    display: block;
 }
 
-.message-success {
-    background: rgba(0, 255, 0, 0.2);
-    border: 1px solid #00ff00;
-}
-
-.message-error {
-    background: rgba(255, 0, 0, 0.2);
-    border: 1px solid #ff0000;
-}
-
-.message-info {
-    background: rgba(255, 255, 0, 0.2);
-    border: 1px solid #ffff00;
-}
-
-/* Сетка с карточками призов */
-.prizes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
-    padding: 20px;
-}
-
-/* Карточка приза */
-.prize-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-    border-radius: 15px;
-    padding: 15px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-}
-
-.prize-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
-    border-color: #00ffff;
-}
-
-.prize-card img {
-    width: 100%;
-    height: 150px;
-    object-fit: contain;
-    border-radius: 10px;
+h3 {
+    font-size: clamp(1.2em, 3vw, 1.5em);
     margin-bottom: 10px;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
 
-.prize-card h3 {
-    margin: 10px 0;
-    color: #00ffff;
-}
-
-.prize-card p {
-    color: #cccccc;
-    font-size: 0.9em;
-}
-
-/* Анимация появления */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.prize-card {
-    animation: fadeIn 0.5s ease-out;
-}
-
-/* Форма регистрации */
+/* Формы и регистрация */
 .registration-form {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(20, 20, 30, 0.8);
     backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 25px;
+    border-radius: 20px;
+    padding: clamp(20px, 5vw, 40px);
     margin: 20px 0;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 30px rgba(0, 255, 255, 0.05),
+        0 0 0 1px rgba(0, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.registration-form::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0.1;
+    transform: rotate(45deg);
+    pointer-events: none;
 }
 
 .form-group {
     margin-bottom: 20px;
-    text-align: left;
+    width: 100%;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    color: #00ffff;
+    margin-bottom: 8px;
+    color: #a0a0ff;
     font-weight: bold;
+    font-size: clamp(0.9em, 2vw, 1em);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    letter-spacing: 1px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select,
+.form-group textarea {
     width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    font-size: 1em;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    font-size: clamp(0.9em, 2vw, 1em);
+    transition: all 0.3s;
+    box-shadow: 
+        inset 0 2px 5px rgba(0, 0, 0, 0.5),
+        0 0 10px rgba(0, 255, 255, 0.1);
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: #00ffff;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 
+        inset 0 2px 5px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(0, 255, 255, 0.3);
 }
 
 .form-group small {
     display: block;
     margin-top: 5px;
-    color: #aaa;
+    color: #8080a0;
     font-size: 0.85em;
 }
 
-.register-btn {
+/* Кнопки */
+.register-btn, .draw-btn, .profile-btn, button {
     width: 100%;
-    padding: 15px;
-    background: linear-gradient(45deg, #00ffff, #0088ff);
-    border: none;
-    border-radius: 8px;
-    color: #1e1e2f;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #1a1a2a, #2a2a3a);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 10px;
+    color: #ffffff;
     font-weight: bold;
-    font-size: 1.2em;
+    font-size: clamp(1em, 3vw, 1.2em);
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.3s;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    box-shadow: 
+        0 5px 15px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(0, 255, 255, 0.2),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
-.register-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+.register-btn:hover, .draw-btn:hover, .profile-btn:hover, button:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #2a2a3a, #3a3a4a);
+    box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 255, 255, 0.4),
+        0 0 40px rgba(0, 255, 255, 0.2);
+    border-color: rgba(0, 255, 255, 0.5);
+}
+
+.register-btn:active, .draw-btn:active, .profile-btn:active, button:active {
+    transform: translateY(1px);
+    box-shadow: 
+        0 2px 10px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.register-btn:disabled, .draw-btn:disabled, button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    filter: grayscale(50%);
+}
+
+/* Сетка призов */
+.prizes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.prize-card {
+    background: rgba(20, 20, 30, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.5),
+        inset 0 0 30px rgba(0, 255, 255, 0.05);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.prize-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.prize-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(0, 255, 255, 0.3),
+        inset 0 0 30px rgba(0, 255, 255, 0.1);
+}
+
+.prize-card:hover::before {
+    opacity: 0.2;
+}
+
+.prize-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
+    transition: all 0.3s;
+}
+
+.prize-card:hover img {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+}
+
+.prize-card h3 {
+    margin: 10px 0;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.prize-card p {
+    color: #a0a0a0;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.prize-price {
+    color: #00ffff;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    padding: 5px;
+    background: rgba(0, 255, 255, 0.1);
+    border-radius: 5px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+/* Сообщения */
+.message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 10px;
+    color: #ffffff;
+    z-index: 1000;
+    animation: slideIn 0.3s;
+    max-width: 90%;
+    word-wrap: break-word;
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 255, 255, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.message-success {
+    background: rgba(0, 30, 0, 0.95);
+    border-left: 4px solid #00ff00;
+}
+
+.message-error {
+    background: rgba(30, 0, 0, 0.95);
+    border-left: 4px solid #ff0000;
+}
+
+.message-info {
+    background: rgba(0, 0, 30, 0.95);
+    border-left: 4px solid #00ffff;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Таблицы */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(20, 20, 30, 0.8);
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 20px 0;
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+th {
+    background: rgba(0, 255, 255, 0.15);
+    padding: 15px;
+    color: #ffffff;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #e0e0e0;
+}
+
+tr:hover {
+    background: rgba(0, 255, 255, 0.05);
+}
+
+/* Адаптивность таблиц */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    th, td {
+        padding: 10px;
+    }
 }
 
 /* Информация о пользователе */
 .user-info {
-    background: rgba(0, 255, 255, 0.1);
+    background: rgba(20, 20, 30, 0.9);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 20px;
     margin: 20px 0;
-    border: 2px solid #00ffff;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 30px rgba(0, 255, 255, 0.05);
 }
 
 .balance {
-    font-size: 1.5em;
+    font-size: clamp(1.5em, 4vw, 2em);
     color: #00ffff;
-    margin: 10px 0;
+    margin: 15px 0;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    text-align: center;
 }
 
 .contacts {
     display: flex;
     gap: 20px;
     justify-content: center;
-    color: #aaa;
+    flex-wrap: wrap;
+    color: #a0a0a0;
 }
 
-/* Цена приза */
-.prize-price {
-    margin-top: 10px;
-    padding: 5px;
-    background: rgba(255, 215, 0, 0.2);
-    border-radius: 5px;
-    color: gold;
-    font-weight: bold;
-}
-
-/* Таблица победителей */
-.winners-section {
-    margin-top: 40px;
-    overflow-x: auto;
-}
-
-.winners-table table {
-    width: 100%;
-    border-collapse: collapse;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.winners-table th {
-    background: rgba(0, 255, 255, 0.2);
-    padding: 12px;
-    color: #00ffff;
-}
-
-.winners-table td {
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.winners-table a {
+.contacts a {
     color: #00ffff;
     text-decoration: none;
+    transition: all 0.3s;
 }
 
-.winners-table a:hover {
-    text-decoration: underline;
+.contacts a:hover {
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
-/* Кнопка розыгрыша */
-.draw-btn {
-    width: 100%;
-    padding: 20px;
+/* Навигация */
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
     margin: 20px 0;
-    background: linear-gradient(45deg, #ff00ff, #ff0088);
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-size: 1.5em;
+}
+
+.nav-btn {
+    padding: 12px 24px;
+    background: rgba(20, 20, 30, 0.8);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.nav-btn:hover {
+    background: rgba(30, 30, 40, 0.9);
+    border-color: rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.nav-btn.active {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+/* Победители */
+.public-winners {
+    background: rgba(20, 20, 30, 0.8);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 30px 0;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 30px rgba(0, 255, 255, 0.05);
+}
+
+.winners-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 20px;
+    padding-right: 10px;
+}
+
+.winners-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.winners-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.winners-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.winners-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.5);
+}
+
+.winner-item {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    transition: all 0.3s;
+}
+
+.winner-item:hover {
+    background: rgba(0, 255, 255, 0.05);
+    padding-left: 20px;
+}
+
+.winner-item .nickname {
+    color: #00ffff;
     font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
 }
 
-.draw-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+.winner-item .prize {
+    color: #ffffff;
 }
 
-.draw-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.winner-item .date {
+    color: #8080a0;
+    font-size: 0.85em;
+}
+
+/* Загрузка */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #00ffff;
+    font-size: 1.2em;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.5;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+    }
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .prizes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .prize-card img {
+        height: 150px;
+    }
+    
+    .nav-buttons {
+        flex-direction: column;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
     .contacts {
         flex-direction: column;
+        align-items: center;
         gap: 10px;
     }
     
-    .winners-table {
-        font-size: 0.9em;
+    .winner-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .message {
+        left: 20px;
+        right: 20px;
+        max-width: none;
     }
 }
 
-/* Стили для полей пароля */
-input[type="password"] {
-    width: 100%;
-    padding: 12px;
+@media (max-width: 480px) {
+    .prizes-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    .registration-form {
+        padding: 20px;
+    }
+    
+    .form-group input {
+        padding: 10px;
+    }
+    
+    .register-btn, .draw-btn {
+        padding: 12px;
+    }
+}
+
+/* Темная тема для админ-панели */
+.admin-container {
+    background: #0a0a0f;
+    min-height: 100vh;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.stat-card {
+    background: rgba(20, 20, 30, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 30px rgba(0, 255, 255, 0.05);
+}
+
+.stat-value {
+    font-size: 2.5em;
+    color: #00ffff;
+    margin: 10px 0;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+.stat-label {
+    color: #a0a0a0;
+    font-size: 1.1em;
+}
+
+/* Вкладки админки */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    flex: 1;
+    min-width: 120px;
+    background: rgba(20, 20, 30, 0.8);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 12px 20px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    font-family: monospace;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1em;
 }
 
-/* Индикатор сложности пароля (можно добавить позже) */
-.password-strength {
-    height: 4px;
-    margin-top: 5px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.1);
+.tab-btn:hover {
+    background: rgba(30, 30, 40, 0.9);
+    border-color: rgba(0, 255, 255, 0.5);
 }
 
-.password-strength.weak { background: #ff4444; width: 33%; }
-.password-strength.medium { background: #ffaa44; width: 66%; }
-.password-strength.strong { background: #44ff44; width: 100%; }
+.tab-btn.active {
+    background: rgba(0, 255, 255, 0.15);
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+/* Анимации */
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+    }
+}
+
+.glow {
+    animation: glow 3s infinite;
+}
+
+/* Стили для ссылок */
+a {
+    color: #00ffff;
+    text-decoration: none;
+    position: relative;
+    transition: all 0.3s;
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00ffff, transparent);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+}
+
+a:hover::after {
+    transform: scaleX(1);
+}
+
+a:hover {
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
