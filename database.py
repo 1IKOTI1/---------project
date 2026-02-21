@@ -91,7 +91,28 @@ class RaffleDatabase:
                     'site_url': user[4],
                     'shadow_coins': user[5]
                 }
-            }        
+            } 
+            
+    def check_site_url_exists(self, site_url):
+        if not site_url:
+            return False
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM users WHERE site_url = ?", (site_url,))
+            return cursor.fetchone() is not None          
+    def check_telegram_exists(self, telegram):
+        if not telegram:
+            return False
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM users WHERE telegram = ?", (telegram,))
+            return cursor.fetchone() is not None
+    def check_nickname_exists(self, nickname):
+    
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM users WHERE nickname = ?", (nickname,))
+            return cursor.fetchone() is not None               
 
     def __init__(self, db_name="raffle.db"):
         self.db_name = db_name
