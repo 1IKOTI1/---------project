@@ -221,16 +221,21 @@ class ShadowRaffleGame {
             });
             
             const data = await response.json();
+            console.log('Ответ при розыгрыше:', data);  // ← отладка
             
             if (data.success) {
-                // Обновляем баланс
+                // Обновляем баланс в текущем объекте
                 this.currentUser.shadow_coins = data.new_balance;
+                
+                // Сохраняем в localStorage
                 localStorage.setItem('shadowUser', JSON.stringify(this.currentUser));
+                
+                // Обновляем отображение на странице
                 document.getElementById('userCoins').textContent = data.new_balance;
                 
                 this.showMessage(data.message, 'success');
-                await this.loadPrizes();
-                await this.loadPublicWinners();
+                await this.loadPrizes();  // Обновляем список призов
+                await this.loadPublicWinners();  // Обновляем список победителей
             } else {
                 this.showMessage(data.message, 'error');
             }
@@ -258,8 +263,11 @@ class ShadowRaffleGame {
         localStorage.removeItem('shadowUser');
         window.location.href = '/';
     }
+
+    
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     new ShadowRaffleGame();
 });
+   
