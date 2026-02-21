@@ -3,25 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Розыгрыш призов</title>
+    <title>Розыгрыш коллекционных карт</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🎁 Розыгрыш призов 🎁</h1>
+        <h1>🎴 Розыгрыш коллекционных карт 🎴</h1>
         
-        <div class="controls">
-            <input type="text" 
-                   id="nicknameInput" 
-                   placeholder="Введите ваш никнейм..." 
-                   maxlength="30">
-            <button id="playButton">Забрать приз</button>
+        <!-- Форма регистрации/входа -->
+        <div class="registration-form">
+            <h2>Регистрация / Вход</h2>
+            
+            <div class="form-group">
+                <label for="nickname">Никнейм (обязательно):</label>
+                <input type="text" id="nickname" placeholder="Введите ваш никнейм" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="telegram">Telegram (@username):</label>
+                <input type="text" id="telegram" placeholder="@username">
+                <small>Или заполните ссылку на сайт</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="siteUrl">Ссылка на профиль:</label>
+                <input type="url" id="siteUrl" placeholder="https://example.com/profile">
+                <small>Или заполните Telegram</small>
+            </div>
+            
+            <button id="registerBtn" class="register-btn">Войти / Зарегистрироваться</button>
         </div>
-
+        
+        <!-- Информация о пользователе (появится после входа) -->
+        <div class="user-info" id="userInfo" style="display: none;">
+            <h2>Привет, <span id="displayNickname"></span>!</h2>
+            <div class="balance">
+                🪙 Монеты: <span id="coinBalance">0</span>
+            </div>
+            <div class="contacts">
+                <div id="displayTelegram"></div>
+                <div id="displaySiteUrl"></div>
+            </div>
+        </div>
+        
+        <!-- Сообщения -->
         <div id="message" class="message"></div>
-
-        <h2>Доступные призы:</h2>
-        <div id="prizesGrid" class="prizes-grid"></div>
+        
+        <!-- Секция розыгрыша (появится после входа) -->
+        <div class="raffle-section" id="raffleSection" style="display: none;">
+            <h2>Доступные карты:</h2>
+            <div id="prizesGrid" class="prizes-grid"></div>
+            
+            <div class="raffle-controls">
+                <button id="drawButton" class="draw-btn">🎲 Крутить рулетку (1 монета) 🎲</button>
+            </div>
+        </div>
+        
+        <!-- Таблица победителей -->
+        <div class="winners-section">
+            <h2>🏆 Таблица победителей 🏆</h2>
+            <div id="winnersTable" class="winners-table"></div>
+        </div>
     </div>
 
     <script src="/static/script.js"></script>
