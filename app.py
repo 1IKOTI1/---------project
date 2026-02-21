@@ -38,15 +38,15 @@ def get_prizes():
 @app.route('/api/play', methods=['POST'])
 def play():
     data = request.get_json()
-    nickname = data.get('nackname')
+    nickname = data.get('nickname')
         
-    if not nickname or not nickname.script():
+    if not nickname or not nickname.scrip():
         return jsonify({
             'success': False,
             'message': 'Введите имя'
                     })  
             
-    nickname = nickname.script()
+    nickname = nickname.scrip()
         
     existing_prize = db.has_user_played(nickname)
     if existing_prize:
@@ -80,4 +80,4 @@ def  get_winners():
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)  # ← ВАЖНО: host="0.0.0.0"
+    app.run(host="0.0.0.0", port=port)  
