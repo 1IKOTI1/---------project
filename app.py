@@ -344,7 +344,28 @@ def login_with_password():
         return jsonify({'success': False, 'message': 'Введите никнейм и пароль'})
     
     result = db.login_with_password(nickname, password)
-    return jsonify(result)        
+    return jsonify(result) 
+
+@app.route('/api/user-data')
+def get_user_data():
+    """Получить актуальные данные пользователя"""
+    user_id = request.args.get('user_id')
+    print(f"📊 Запрос данных пользователя: user_id={user_id}")
+    
+    if not user_id:
+        return jsonify({'success': False, 'message': 'Не указан пользователь'})
+    
+    try:
+        user = db.get_user_by_id(user_id)
+        if user:
+            print(f"✅ Пользователь найден: {user}")
+            return jsonify({'success': True, 'user': user})
+        else:
+            print(f"❌ Пользователь не найден: {user_id}")
+            return jsonify({'success': False, 'message': 'Пользователь не найден'})
+    except Exception as e:
+        print(f"🔥 Ошибка: {e}")
+        return jsonify({'success': False, 'message': str(e)})      
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
