@@ -18,22 +18,700 @@
             margin: 0 auto;
         }
         
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
         h1 {
             color: #00ffff;
-            text-align: center;
+            margin: 0;
+        }
+        
+        .logout-btn {
+            background: #ff4444;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #ff6666;
+        }
+        
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
         
-        .message {
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
             color: #00ffff;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #aaa;
+        }
+        
+        /* Вкладки */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+        
+        .tab-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+        }
+        
+        /* Контент вкладок */
+        .tab-content {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Таблицы */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 12px;
+            color: #00ffff;
+            font-weight: bold;
+            text-align: left;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Формы */
+        .form-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ffff;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            box-sizing: border-box;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            border: none;
+            border-radius: 5px;
+            color: #1e1e2f;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            margin: 2px;
+            font-size: 0.9em;
+        }
+        
+        .add-coins-btn {
+            background: #00aa00;
+            color: white;
+        }
+        
+        /* Сообщения */
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+        }
+        
+        .message-success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .message-error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00ffff;
+            font-size: 1.2em;
+        }
+        
+        .top-users {
+            margin-top: 20px;
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .top-user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⚙️ Админ-панель</h1>
-        <div class="message">Добро пожаловать в админ-панель!</div>
+        <div class="header">
+            <h1>⚙️ Админ-панель</h1>
+            <a href="/admin/logout" class="logout-btn">🚪 Выйти</a>
+        </div>
+        
+        <!-- Статистика -->
+        <div class="stats-grid" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsers">-</div>
+                <div class="stat-label">Пользователей</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCoins">-</div>
+                <div class="stat-label">Всего монет</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="availablePrizes">-</div>
+                <div class="stat-label">Доступно призов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalWinners">-</div>
+                <div class="stat-label">Победителей</div>
+            </div>
+        </div>
+        
+        <!-- Вкладки -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('users')">👥 Пользователи</button>
+            <button class="tab-btn" onclick="switchTab('prizes')">🎁 Призы</button>
+            <button class="tab-btn" onclick="switchTab('winners')">🏆 Победители</button>
+            <button class="tab-btn" onclick="switchTab('add_coins')">💰 Выдать монеты</button>
+            <button class="tab-btn" onclick="switchTab('add_prize')">➕ Добавить приз</button>
+            <button class="tab-btn" onclick="switchTab('transactions')">📊 Транзакции</button>
+        </div>
+        
+        <!-- Вкладка: Пользователи -->
+        <div id="tab-users" class="tab-content active">
+            <h2>👥 Список пользователей</h2>
+            <div class="top-users" id="topUsers"></div>
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Никнейм</th>
+                        <th>Telegram</th>
+                        <th>Ссылка</th>
+                        <th>Монеты</th>
+                        <th>Дата регистрации</th>
+                        <th>Последний вход</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="8" class="loading">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Вкладка: Призы -->
+        <div id="tab-prizes" class="tab-content">
+            <h2>🎁 Все призы</h2>
+            <table id="prizesTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Изображение</th>
+                        <th>Описание</th>
+                        <th>Доступен</th>
+                        <th>Дата создания</th>
+                    </tr>
+                </thead>
+                <tbody id="prizesTableBody">
+                    <tr><td colspan="6" class="loading">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Вкладка: Победители (полные данные) -->
+        <div id="tab-winners" class="tab-content">
+            <h2>🏆 Полная таблица победителей</h2>
+            <table id="winnersTable">
+                <thead>
+                    <tr>
+                        <th>Никнейм</th>
+                        <th>Telegram</th>
+                        <th>Ссылка</th>
+                        <th>Приз</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody id="winnersTableBody">
+                    <tr><td colspan="5" class="loading">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Вкладка: Выдать монеты -->
+        <div id="tab-add_coins" class="tab-content">
+            <div class="form-section">
+                <h2>💰 Выдать теневые монеты</h2>
+                
+                <div class="form-group">
+                    <label>Никнейм пользователя</label>
+                    <input type="text" id="coinNickname" placeholder="Введите никнейм">
+                </div>
+                
+                <div class="form-group">
+                    <label>Количество монет</label>
+                    <input type="number" id="coinAmount" value="10" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Причина (необязательно)</label>
+                    <input type="text" id="coinReason" placeholder="Например: бонус за активность">
+                </div>
+                
+                <button onclick="addCoins()">💎 Выдать монеты</button>
+            </div>
+        </div>
+        
+        <!-- Вкладка: Добавить приз -->
+        <div id="tab-add_prize" class="tab-content">
+            <div class="form-section">
+                <h2>➕ Добавить новый приз</h2>
+                
+                <div class="form-group">
+                    <label>Название приза</label>
+                    <input type="text" id="prizeName" placeholder="Например: Теневая карта #6">
+                </div>
+                
+                <div class="form-group">
+                    <label>Имя файла изображения</label>
+                    <input type="text" id="prizeImage" placeholder="card6.png">
+                    <small>Файл должен лежать в static/images/</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="prizeDescription" rows="3" placeholder="Описание приза"></textarea>
+                </div>
+                
+                <button onclick="addPrize()">✨ Добавить приз</button>
+            </div>
+        </div>
+        
+        <!-- Вкладка: Транзакции -->
+        <div id="tab-transactions" class="tab-content">
+            <h2>📊 История транзакций</h2>
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Пользователь</th>
+                        <th>Сумма</th>
+                        <th>Причина</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsTableBody">
+                    <tr><td colspan="5" class="loading">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+    
+    <!-- Сообщения -->
+    <div id="message" style="display: none;"></div>
+    
+    <script>
+        // Переключение вкладок
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Загружаем данные для вкладки
+            loadTabData(tabName);
+        }
+        
+        // Загрузка данных для активной вкладки
+        function loadTabData(tabName) {
+            switch(tabName) {
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'prizes':
+                    loadPrizes();
+                    break;
+                case 'winners':
+                    loadWinners();
+                    break;
+                case 'transactions':
+                    loadTransactions();
+                    break;
+            }
+        }
+        
+        // Показать сообщение
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = text;
+            msgDiv.className = `message message-${type}`;
+            msgDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Загрузка статистики
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalUsers').textContent = data.stats.total_users;
+                    document.getElementById('totalCoins').textContent = data.stats.total_coins;
+                    document.getElementById('availablePrizes').textContent = data.stats.available_prizes;
+                    document.getElementById('totalWinners').textContent = data.stats.total_winners;
+                    
+                    // Топ пользователей
+                    const topUsers = data.stats.top_users;
+                    if (topUsers && topUsers.length > 0) {
+                        document.getElementById('topUsers').innerHTML = `
+                            <h3>🏆 Топ пользователей по монетам</h3>
+                            ${topUsers.map(u => `
+                                <div class="top-user-item">
+                                    <span>${u.nickname}</span>
+                                    <span style="color: #00ffff;">${u.coins} монет</span>
+                                </div>
+                            `).join('')}
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики:', error);
+            }
+        }
+        
+        // Загрузка пользователей
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="8" class="loading">Загрузка...</td></tr>';
+            
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+                
+                if (data.success && data.users.length > 0) {
+                    tbody.innerHTML = data.users.map(user => `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.nickname}</td>
+                            <td>${user.telegram || '-'}</td>
+                            <td>${user.site_url ? `<a href="${user.site_url}" target="_blank">ссылка</a>` : '-'}</td>
+                            <td style="color: #00ffff; font-weight: bold;">${user.shadow_coins}</td>
+                            <td>${new Date(user.created_at).toLocaleString()}</td>
+                            <td>${new Date(user.last_login).toLocaleString()}</td>
+                            <td>
+                                <button class="action-btn add-coins-btn" onclick="quickAddCoins('${user.nickname}')">+💰</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Нет пользователей</td></tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Ошибка загрузки</td></tr>';
+            }
+        }
+        
+        // Быстрое добавление монет
+        function quickAddCoins(nickname) {
+            document.getElementById('coinNickname').value = nickname;
+            document.getElementById('coinAmount').value = 10;
+            switchTab('add_coins');
+        }
+        
+        // Добавление монет
+        async function addCoins() {
+            const nickname = document.getElementById('coinNickname').value.trim();
+            const amount = parseInt(document.getElementById('coinAmount').value);
+            const reason = document.getElementById('coinReason').value.trim();
+            
+            if (!nickname) {
+                showMessage('Введите никнейм пользователя', 'error');
+                return;
+            }
+            
+            if (!amount || amount < 1) {
+                showMessage('Введите корректное количество монет', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/add_coins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nickname: nickname,
+                        amount: amount,
+                        reason: reason
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    document.getElementById('coinNickname').value = '';
+                    document.getElementById('coinAmount').value = '10';
+                    document.getElementById('coinReason').value = '';
+                    loadStats();
+                    loadUsers();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Ошибка соединения с сервером', 'error');
+            }
+        }
+        
+        // Загрузка призов
+        async function loadPrizes() {
+            const tbody = document.getElementById('prizesTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">Загрузка...</td></tr>';
+            
+            try {
+                const response = await fetch('/api/admin/prizes');
+                const data = await response.json();
+                
+                if (data.success && data.prizes.length > 0) {
+                    tbody.innerHTML = data.prizes.map(prize => `
+                        <tr>
+                            <td>${prize.id}</td>
+                            <td>${prize.name}</td>
+                            <td>${prize.image}</td>
+                            <td>${prize.description || '-'}</td>
+                            <td style="color: ${prize.available ? '#00ff00' : '#ff4444'}">
+                                ${prize.available ? '✅ Доступен' : '❌ Разыгран'}
+                            </td>
+                            <td>${new Date(prize.created_at).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Нет призов</td></tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Ошибка загрузки</td></tr>';
+            }
+        }
+        
+        // Загрузка победителей (полные данные)
+        async function loadWinners() {
+            const tbody = document.getElementById('winnersTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">Загрузка...</td></tr>';
+            
+            try {
+                const response = await fetch('/api/admin/winners');
+                const data = await response.json();
+                
+                if (data.success && data.winners.length > 0) {
+                    tbody.innerHTML = data.winners.map(w => `
+                        <tr>
+                            <td>${w.nickname}</td>
+                            <td>${w.telegram || '-'}</td>
+                            <td>${w.site_url ? `<a href="${w.site_url}" target="_blank">ссылка</a>` : '-'}</td>
+                            <td>${w.prize_name}</td>
+                            <td>${new Date(w.won_at).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Нет победителей</td></tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Ошибка загрузки</td></tr>';
+            }
+        }
+        
+        // Загрузка транзакций
+        async function loadTransactions() {
+            const tbody = document.getElementById('transactionsTableBody');
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">Загрузка...</td></tr>';
+            
+            try {
+                const response = await fetch('/api/admin/transactions');
+                const data = await response.json();
+                
+                if (data.success && data.transactions.length > 0) {
+                    tbody.innerHTML = data.transactions.map(t => `
+                        <tr>
+                            <td>${t.id}</td>
+                            <td>User #${t.user_id}</td>
+                            <td style="color: ${t.amount > 0 ? '#00ff00' : '#ff4444'}; font-weight: bold;">
+                                ${t.amount > 0 ? '+' : ''}${t.amount}
+                            </td>
+                            <td>${t.reason || '-'}</td>
+                            <td>${new Date(t.created_at).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Нет транзакций</td></tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Ошибка загрузки</td></tr>';
+            }
+        }
+        
+        // Добавление приза
+        async function addPrize() {
+            const name = document.getElementById('prizeName').value.trim();
+            const image = document.getElementById('prizeImage').value.trim();
+            const description = document.getElementById('prizeDescription').value.trim();
+            
+            if (!name || !image) {
+                showMessage('Заполните название и имя файла изображения', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/add_prize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        image: image,
+                        description: description
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Приз успешно добавлен!', 'success');
+                    document.getElementById('prizeName').value = '';
+                    document.getElementById('prizeImage').value = '';
+                    document.getElementById('prizeDescription').value = '';
+                    loadPrizes();
+                    loadStats();
+                } else {
+                    showMessage('Ошибка при добавлении приза', 'error');
+                }
+            } catch (error) {
+                showMessage('Ошибка соединения с сервером', 'error');
+            }
+        }
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadUsers();
+            loadPrizes();
+            loadWinners();
+            loadTransactions();
+        });
+    </script>
 </body>
 </html>
