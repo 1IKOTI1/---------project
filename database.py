@@ -21,7 +21,7 @@ class RaffleDatabase:
                     nickname TEXT UNIQUE NOT NULL,
                     telegram TEXT UNIQUE,
                     site_url TEXT UNIQUE,
-                    coins INTEGER DEFAULT 10,
+                    shadow_coins INTEGER DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -34,7 +34,6 @@ class RaffleDatabase:
                     name TEXT NOT NULL,
                     image TEXT NOT NULL,
                     description TEXT,
-                    price INTEGER DEFAULT 1,
                     available BOOLEAN DEFAULT 1,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
@@ -46,14 +45,13 @@ class RaffleDatabase:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER NOT NULL,
                     prize_id INTEGER NOT NULL,
-                    spent_coins INTEGER DEFAULT 1,
                     won_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (user_id) REFERENCES users (id),
                     FOREIGN KEY (prize_id) REFERENCES prizes (id)
                 )
             ''')
             
-            # Таблица транзакций валюты (для админа)
+            # Таблица транзакций теневых монет
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS coin_transactions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,14 +70,14 @@ class RaffleDatabase:
             
             if count == 0:
                 default_prizes = [
-                    ('Карточка 1', 'card1.png', 'Редкая карточка #1', 1),
-                    ('Карточка 2', 'card2.png', 'Редкая карточка #2', 2),
-                    ('Карточка 3', 'card3.png', 'Редкая карточка #3', 3),
-                    ('Карточка 4', 'card4.png', 'Редкая карточка #4', 4),
-                    ('Карточка 5', 'card5.png', 'Редкая карточка #5', 5)
+                    ('Теневая карта #1', 'card1.png', 'Редкая теневая карта'),
+                    ('Теневая карта #2', 'card2.png', 'Очень редкая теневая карта'),
+                    ('Теневая карта #3', 'card3.png', 'Легендарная теневая карта'),
+                    ('Теневая карта #4', 'card4.png', 'Мифическая теневая карта'),
+                    ('Теневая карта #5', 'card5.png', 'Древняя теневая карта')
                 ]
                 cursor.executemany(
-                    "INSERT INTO prizes (name, image, description, price) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO prizes (name, image, description) VALUES (?, ?, ?)",
                     default_prizes
                 )
                 conn.commit()
@@ -88,7 +86,7 @@ class RaffleDatabase:
     # ========== РАБОТА С ПОЛЬЗОВАТЕЛЯМИ ==========
     
     def register_or_login(self, nickname, telegram=None, site_url=None):
-        """Регистрация или вход пользователя"""
+        """Регистрация или вход пользователя (без стартовых монет)"""
         print(f"📝 Регистрация/вход: {nickname}, tg: {telegram}, url: {site_url}")
         
         with self.get_connection() as conn:
@@ -118,15 +116,15 @@ class RaffleDatabase:
                         'nickname': user[1],
                         'telegram': user[2],
                         'site_url': user[3],
-                        'coins': user[4]
+                        'shadow_coins': user[4]
                     }
                 }
             else:
-                # Создаем нового пользователя
+                # Создаем нового пользователя (без монет!)
                 try:
                     cursor.execute('''
-                        INSERT INTO users (nickname, telegram, site_url, coins)
-                        VALUES (?, ?, ?, 10)
+                        INSERT INTO users (nickname, telegram, site_url, shadow_coins)
+                        VALUES (?, ?, ?, 0)
                     ''', (nickname, telegram, site_url))
                     conn.commit()
                     
@@ -141,7 +139,7 @@ class RaffleDatabase:
                             'nickname': user[1],
                             'telegram': user[2],
                             'site_url': user[3],
-                            'coins': user[4]
+                            'shadow_coins': user[4]
                         }
                     }
                 except sqlite3.IntegrityError as e:
@@ -159,28 +157,44 @@ class RaffleDatabase:
                     'nickname': user[1],
                     'telegram': user[2],
                     'site_url': user[3],
-                    'coins': user[4]
+                    'shadow_coins': user[4]
                 }
             return None
     
-    # ========== РАБОТА С ВАЛЮТОЙ ==========
-    
-    def get_user_coins(self, user_id):
-        """Получить баланс пользователя"""
+    def get_user_by_id(self, user_id):
+        """Получить пользователя по ID"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT coins FROM users WHERE id = ?", (user_id,))
+            cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+            user = cursor.fetchone()
+            if user:
+                return {
+                    'id': user[0],
+                    'nickname': user[1],
+                    'telegram': user[2],
+                    'site_url': user[3],
+                    'shadow_coins': user[4]
+                }
+            return None
+    
+    # ========== РАБОТА С ТЕНЕВЫМИ МОНЕТАМИ ==========
+    
+    def get_user_coins(self, user_id):
+        """Получить баланс теневых монет"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT shadow_coins FROM users WHERE id = ?", (user_id,))
             result = cursor.fetchone()
             return result[0] if result else 0
     
-    def add_coins(self, user_id, amount, reason="", admin_id=None):
-        """Добавить монеты пользователю (для админа)"""
+    def add_shadow_coins(self, user_id, amount, reason="", admin_id=None):
+        """Добавить теневые монеты пользователю (только для админа)"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
             # Обновляем баланс
             cursor.execute(
-                "UPDATE users SET coins = coins + ? WHERE id = ?",
+                "UPDATE users SET shadow_coins = shadow_coins + ? WHERE id = ?",
                 (amount, user_id)
             )
             
@@ -193,41 +207,41 @@ class RaffleDatabase:
             conn.commit()
             return True
     
-    def spend_coins(self, user_id, amount):
-        """Потратить монеты (при розыгрыше)"""
+    def spend_shadow_coin(self, user_id):
+        """Потратить 1 теневую монету на прокрутку"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
             # Проверяем баланс
-            cursor.execute("SELECT coins FROM users WHERE id = ?", (user_id,))
+            cursor.execute("SELECT shadow_coins FROM users WHERE id = ?", (user_id,))
             current = cursor.fetchone()[0]
             
-            if current < amount:
+            if current < 1:
                 return False
             
-            # Списываем монеты
+            # Списываем монету
             cursor.execute(
-                "UPDATE users SET coins = coins - ? WHERE id = ?",
-                (amount, user_id)
+                "UPDATE users SET shadow_coins = shadow_coins - 1 WHERE id = ?",
+                (user_id,)
             )
             
             # Записываем транзакцию
             cursor.execute('''
                 INSERT INTO coin_transactions (user_id, amount, reason)
                 VALUES (?, ?, ?)
-            ''', (user_id, -amount, 'Розыгрыш приза'))
+            ''', (user_id, -1, 'Прокрутка рулетки'))
             
             conn.commit()
             return True
     
-    # ========== РАБОТА С ПРИЗАМИ ==========
+    # ========== РОЗЫГРЫШ ==========
     
     def get_available_prizes(self):
         """Получить доступные призы"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT id, name, image, description, price FROM prizes WHERE available = 1"
+                "SELECT id, name, image, description FROM prizes WHERE available = 1"
             )      
             prizes = cursor.fetchall()
             return [
@@ -235,56 +249,61 @@ class RaffleDatabase:
                     'id': p[0],
                     'name': p[1],
                     'image': p[2],
-                    'description': p[3] if p[3] else '',
-                    'price': p[4]
+                    'description': p[3] if p[3] else ''
                 }
                 for p in prizes
             ]
     
     def draw_prize(self, user_id):
-        """Розыгрыш приза для пользователя"""
+        """Розыгрыш приза (1 попытка = 1 монета)"""
         print(f"🎲 draw_prize для user_id: {user_id}")
         
         try:
             with self.get_connection() as conn:
                 cursor = conn.cursor()
                 
+                # Проверяем баланс
+                cursor.execute("SELECT shadow_coins FROM users WHERE id = ?", (user_id,))
+                user_coins = cursor.fetchone()[0]
+                
+                if user_coins < 1:
+                    return {'success': False, 'message': 'Недостаточно теневых монет'}
+                
                 # Получаем доступные призы
-                cursor.execute("SELECT id, name, image, price FROM prizes WHERE available = 1")
+                cursor.execute("SELECT id, name, image FROM prizes WHERE available = 1")
                 available_prizes = cursor.fetchall()
                 
                 if not available_prizes:
                     return {'success': False, 'message': 'Призы закончились'}
                 
-                # Проверяем баланс пользователя
-                cursor.execute("SELECT coins FROM users WHERE id = ?", (user_id,))
-                user_coins = cursor.fetchone()[0]
+                # Списываем монету
+                cursor.execute(
+                    "UPDATE users SET shadow_coins = shadow_coins - 1 WHERE id = ?",
+                    (user_id,)
+                )
                 
                 # Выбираем случайный приз
                 prize = random.choice(available_prizes)
-                
-                if user_coins < prize[3]:
-                    return {'success': False, 'message': f'Недостаточно монет. Нужно: {prize[3]}'}
-                
-                # Списываем монеты
-                cursor.execute(
-                    "UPDATE users SET coins = coins - ? WHERE id = ?",
-                    (prize[3], user_id)
-                )
                 
                 # Помечаем приз как недоступный
                 cursor.execute("UPDATE prizes SET available = 0 WHERE id = ?", (prize[0],))
                 
                 # Записываем победителя
                 cursor.execute('''
-                    INSERT INTO winners (user_id, prize_id, spent_coins) 
+                    INSERT INTO winners (user_id, prize_id) 
+                    VALUES (?, ?)
+                ''', (user_id, prize[0]))
+                
+                # Записываем транзакцию
+                cursor.execute('''
+                    INSERT INTO coin_transactions (user_id, amount, reason)
                     VALUES (?, ?, ?)
-                ''', (user_id, prize[0], prize[3]))
+                ''', (user_id, -1, f'Выигрыш: {prize[1]}'))
                 
                 conn.commit()
                 
                 # Получаем обновленный баланс
-                cursor.execute("SELECT coins FROM users WHERE id = ?", (user_id,))
+                cursor.execute("SELECT shadow_coins FROM users WHERE id = ?", (user_id,))
                 new_balance = cursor.fetchone()[0]
                 
                 return {
@@ -302,10 +321,48 @@ class RaffleDatabase:
             print(f"🔥 Ошибка в draw_prize: {e}")
             return {'success': False, 'message': 'Ошибка при розыгрыше'}
     
-    # ========== ТАБЛИЦА ПОБЕДИТЕЛЕЙ ==========
+    # ========== ИСТОРИЯ ВЫИГРЫШЕЙ ==========
     
-    def get_all_winners(self):
-        """Полная таблица победителей с их контактами"""
+    def get_user_wins(self, user_id):
+        """Получить историю выигрышей конкретного пользователя"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    p.name as prize_name,
+                    p.image as prize_image,
+                    p.description,
+                    w.won_at
+                FROM winners w
+                JOIN prizes p ON w.prize_id = p.id
+                WHERE w.user_id = ?
+                ORDER BY w.won_at DESC
+            ''', (user_id,))
+            return cursor.fetchall()
+    
+    # ========== ТАБЛИЦА ПОБЕДИТЕЛЕЙ (ПУБЛИЧНАЯ) ==========
+    
+    def get_public_winners(self):
+        """Публичная таблица победителей (только ники и призы)"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    u.nickname,
+                    p.name as prize_name,
+                    w.won_at
+                FROM winners w
+                JOIN users u ON w.user_id = u.id
+                JOIN prizes p ON w.prize_id = p.id
+                ORDER BY w.won_at DESC
+                LIMIT 50
+            ''')  
+            return cursor.fetchall()
+    
+    # ========== ПОЛНАЯ ТАБЛИЦА ПОБЕДИТЕЛЕЙ (ДЛЯ АДМИНА) ==========
+    
+    def get_full_winners(self):
+        """Полная таблица победителей с контактами (только для админа)"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -314,8 +371,6 @@ class RaffleDatabase:
                     u.telegram,
                     u.site_url,
                     p.name as prize_name,
-                    p.image as prize_image,
-                    w.spent_coins,
                     w.won_at
                 FROM winners w
                 JOIN users u ON w.user_id = u.id
@@ -326,25 +381,36 @@ class RaffleDatabase:
     
     # ========== АДМИН-ФУНКЦИИ ==========
     
-    def add_prize(self, name, image, description, price):
+    def add_prize(self, name, image, description):
         """Добавить новый приз (для админа)"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO prizes (name, image, description, price, available)
-                VALUES (?, ?, ?, ?, 1)
-            ''', (name, image, description, price))
+                INSERT INTO prizes (name, image, description, available)
+                VALUES (?, ?, ?, 1)
+            ''', (name, image, description))
             conn.commit()
             return cursor.lastrowid
     
-    def get_all_users(self):
-        """Получить всех пользователей (для админа)"""
+    def get_all_users_admin(self):
+        """Получить всех пользователей с контактами (для админа)"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                SELECT id, nickname, telegram, site_url, coins, created_at, last_login
+                SELECT id, nickname, telegram, site_url, shadow_coins, created_at, last_login
                 FROM users
-                ORDER BY coins DESC
+                ORDER BY shadow_coins DESC
+            ''')
+            return cursor.fetchall()
+    
+    def get_all_prizes_admin(self):
+        """Все призы (включая разыгранные) для админа"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT id, name, image, description, available, created_at
+                FROM prizes
+                ORDER BY created_at DESC
             ''')
             return cursor.fetchall()
     

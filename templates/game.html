@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Теневой розыгрыш - Игра</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .user-panel {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 20px;
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .shadow-coins {
+            font-size: 2em;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .nav-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+        
+        .content-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        .prizes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .prize-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .prize-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+        }
+        
+        .prize-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+        }
+        
+        .draw-btn {
+            width: 100%;
+            padding: 20px;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            border: none;
+            border-radius: 10px;
+            color: #1e1e2f;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .draw-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+        
+        .draw-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .wins-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .wins-table th {
+            background: rgba(0, 255, 255, 0.2);
+            padding: 12px;
+            color: #00ffff;
+        }
+        
+        .wins-table td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .wins-table img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+        
+        .public-winners {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Шапка с информацией о пользователе -->
+        <div class="header">
+            <div class="user-panel">
+                <h2>Привет, <span id="userNickname"></span>!</h2>
+                <div class="shadow-coins">
+                    🌑 <span id="userCoins">0</span> теневых монет
+                </div>
+                <div id="userContacts" class="user-contacts" style="margin-top: 10px; color: #aaa;"></div>
+            </div>
+            
+            <div class="nav-buttons">
+                <a href="/game" class="nav-btn active" data-section="game">🎲 Игра</a>
+                <a href="/my-wins" class="nav-btn" data-section="wins">🏆 Мои выигрыши</a>
+                <a href="/profile" class="nav-btn" data-section="profile">👤 Профиль</a>
+                <a href="/logout" class="nav-btn">🚪 Выйти</a>
+            </div>
+        </div>
+        
+        <!-- Динамический контент будет загружаться сюда -->
+        <div id="content" class="content-section">
+            <!-- Сюда будет подгружаться контент -->
+        </div>
+        
+        <!-- Сообщения -->
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+    
+    <script src="/static/game.js"></script>
+</body>
+</html>
