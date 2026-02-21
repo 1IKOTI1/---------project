@@ -62,7 +62,6 @@ class RaffleDatabase:
                 return {'success': False, 'message': f'Ошибка регистрации: {str(e)}'}
             
     def login_with_password(self, nickname, password):
-        """Вход с паролем"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
@@ -110,7 +109,7 @@ class RaffleDatabase:
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nickname TEXT UNIQUE NOT NULL,
-                    password TEXT NOT NULL,  # ← НОВОЕ ПОЛЕ
+                    password TEXT NOT NULL,  
                     telegram TEXT UNIQUE,
                     site_url TEXT UNIQUE,
                     shadow_coins INTEGER DEFAULT 0,
