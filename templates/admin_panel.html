@@ -196,7 +196,7 @@
             <button class="tab-btn active" onclick="switchTab('users')">👥 Пользователи</button>
             <button class="tab-btn" onclick="switchTab('prizes')">🎁 Призы</button>
             <button class="tab-btn" onclick="switchTab('winners')">🏆 Победители</button>
-            <button class="tab-btn" onclick="switchTab('add_coins')">💰 Выдать монеты</button>
+             <button class="tab-btn" onclick="switchTab('coins')">💰 Управление монетами</button>
             <button class="tab-btn" onclick="switchTab('add_prize')">➕ Добавить приз</button>
             <button class="tab-btn" onclick="switchTab('transactions')">📊 Транзакции</button>
         </div>
@@ -263,29 +263,6 @@
             </table>
         </div>
         
-        <!-- Вкладка: Выдать монеты -->
-        <div id="tab-add_coins" class="tab-content">
-            <div class="form-section">
-                <h2>💰 Выдать теневые монеты</h2>
-                
-                <div class="form-group">
-                    <label for="coinNickname">Никнейм пользователя</label>
-                    <input type="text" id="coinNickname" placeholder="Введите никнейм">
-                </div>
-                
-                <div class="form-group">
-                    <label for="coinAmount">Количество монет</label>
-                    <input type="number" id="coinAmount" value="10" min="1">
-                </div>
-                
-                <div class="form-group">
-                    <label for="coinReason">Причина (необязательно)</label>
-                    <input type="text" id="coinReason" placeholder="Например: бонус за активность">
-                </div>
-                
-                <button onclick="addCoins()" class="register-btn">💎 Выдать монеты</button>
-            </div>
-        </div>
         
         <!-- Вкладка: Добавить приз -->
         <div id="tab-add_prize" class="tab-content">
@@ -299,10 +276,13 @@
                         maxlength="30">
                 </div>
                 
-                <div class="form-group">
-                    <label for="prizeImage">Имя файла изображения</label>
-                    <input type="text" id="prizeImage" placeholder="card6.png">
-                    <small>Файл должен лежать в static/images/</small>
+                    <div class="form-group">
+                    <label for="prizeImage">Изображение приза</label>
+                    <input type="file" id="prizeImage" accept="image/png, image/jpeg, image/webp, image/gif">
+                    <small>Поддерживаемые форматы: PNG, JPG, WEBP, GIF (макс. 2MB)</small>
+                    <div id="imagePreview" style="margin-top: 10px; max-width: 200px; display: none;">
+                            <img src="" alt="Предпросмотр" style="width: 100%; border-radius: 5px;">
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -373,6 +353,8 @@
                 case 'transactions':
                     loadTransactions();
                     break;
+                case 'coins':
+                    break;    
             }
         }
         
@@ -631,13 +613,19 @@
             }
         }
         
+       // Добавление приза с изображением
         async function addPrize() {
             const name = document.getElementById('prizeName').value.trim();
-            const image = document.getElementById('prizeImage').value.trim();
+            const imageFile = document.getElementById('prizeImage').files[0];
             const description = document.getElementById('prizeDescription').value.trim();
             
-            if (!name || !image) {
-                showMessage('Заполните название и имя файла изображения', 'error');
+            if (!name) {
+                showMessage('Введите название приза', 'error');
+                return;
+            }
+            
+            if (!imageFile) {
+                showMessage('Выберите изображение', 'error');
                 return;
             }
             
@@ -647,17 +635,16 @@
                 return;
             }
             
+            // Создаем FormData для отправки файла
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('image', imageFile);
+            formData.append('description', description);
+            
             try {
                 const response = await fetch('/api/admin/add_prize', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        image: image,
-                        description: description
-                    })
+                    body: formData  // Не указываем Content-Type, браузер сам добавит multipart/form-data
                 });
                 
                 const data = await response.json();
@@ -668,7 +655,8 @@
                     document.getElementById('prizeName').value = '';
                     document.getElementById('prizeImage').value = '';
                     document.getElementById('prizeDescription').value = '';
-                    updateDescCounter(); // Обновляем счетчик
+                    document.getElementById('imagePreview').style.display = 'none';
+                    updateDescCounter();
                     loadPrizes();
                     loadStats();
                 } else {
@@ -693,6 +681,33 @@
             const descTextarea = document.getElementById('prizeDescription');
             if (descTextarea) {
                 descTextarea.addEventListener('input', updateDescCounter);
+            }
+
+            
+        });
+
+        document.getElementById('prizeImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const previewImg = preview.querySelector('img');
+            
+            if (file) {
+                // Проверка размера (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    showMessage('Файл слишком большой (макс. 2MB)', 'error');
+                    this.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
             }
         });
     </script>

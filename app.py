@@ -2,17 +2,35 @@ from flask import Flask, render_template, jsonify, request, session, redirect, u
 from database import RaffleDatabase
 import os
 import logging
+import uuid
+from werkzeug.utils import secure_filename
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Для сессий
+
+# Конфигурация загрузки файлов (ПОСЛЕ создания app)
+UPLOAD_FOLDER = 'static/images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
+# Создаем папку для загрузок, если её нет
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 db = RaffleDatabase()
 
-# Конфигурация админа (добавьте в переменные окружения на Railway)
+# Конфигурация админа
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+
 
 # ========== СУЩЕСТВУЮЩИЕ МАРШРУТЫ (НЕ ТРОГАЕМ) ==========
 
@@ -219,14 +237,36 @@ def add_coins_admin():
     if not nickname:
         return jsonify({'success': False, 'message': 'Введите никнейм'})
     
+    # ЗАЩИТА 1: Проверяем, что amount - число
+    try:
+        amount = int(amount)
+    except (TypeError, ValueError):
+        return jsonify({'success': False, 'message': 'Количество монет должно быть числом'})
+    
     if amount <= 0:
         return jsonify({'success': False, 'message': 'Введите положительное количество монет'})
+    
+    # ЗАЩИТА 2: Ограничение на максимальное количество за раз (10 000)
+    MAX_PER_TRANSACTION = 10000
+    if amount > MAX_PER_TRANSACTION:
+        return jsonify({
+            'success': False, 
+            'message': f'Нельзя добавить больше {MAX_PER_TRANSACTION} монет за раз'
+        })
     
     user = db.get_user_by_nickname(nickname)
     if not user:
         return jsonify({'success': False, 'message': 'Пользователь не найден'})
     
-    db.add_shadow_coins(user['id'], amount, reason, admin_id=1)  # admin_id=1 для примера
+    # ЗАЩИТА 3: Проверяем, что у пользователя не слишком много монет
+    MAX_TOTAL = 1000000
+    if user['shadow_coins'] + amount > MAX_TOTAL:
+        return jsonify({
+            'success': False,
+            'message': f'У пользователя слишком много монет (макс. {MAX_TOTAL})'
+        })
+    
+    db.add_shadow_coins(user['id'], amount, reason, admin_id=1)
     
     # Получаем обновленный баланс
     new_balance = db.get_user_coins(user['id'])
@@ -236,24 +276,109 @@ def add_coins_admin():
         'message': f'Добавлено {amount} теневых монет пользователю {nickname}',
         'new_balance': new_balance
     })
+    
+@app.route('/api/admin/remove_coins', methods=['POST'])
+@admin_required
+def remove_coins_admin():
+    """Снять теневые монеты у пользователя"""
+    data = request.get_json()
+    nickname = data.get('nickname')
+    amount = data.get('amount', 0)
+    reason = data.get('reason', '')
+    
+    if not nickname:
+        return jsonify({'success': False, 'message': 'Введите никнейм'})
+    
+    # Проверяем, что amount - число
+    try:
+        amount = int(amount)
+    except (TypeError, ValueError):
+        return jsonify({'success': False, 'message': 'Количество монет должно быть числом'})
+    
+    if amount <= 0:
+        return jsonify({'success': False, 'message': 'Введите положительное количество монет для снятия'})
+    
+    # Ограничение на максимальное количество за раз
+    MAX_PER_TRANSACTION = 10000
+    if amount > MAX_PER_TRANSACTION:
+        return jsonify({
+            'success': False, 
+            'message': f'Нельзя снять больше {MAX_PER_TRANSACTION} монет за раз'
+        })
+    
+    user = db.get_user_by_nickname(nickname)
+    if not user:
+        return jsonify({'success': False, 'message': 'Пользователь не найден'})
+    
+    # Проверяем, хватит ли монет
+    if user['shadow_coins'] < amount:
+        return jsonify({
+            'success': False,
+            'message': f'Недостаточно монет. Текущий баланс: {user["shadow_coins"]}'
+        })
+    
+    # Снимаем монеты (вызываем метод из database.py)
+    success = db.remove_shadow_coins(user['id'], amount, reason, admin_id=1)
+    
+    if not success:
+        return jsonify({'success': False, 'message': 'Ошибка при снятии монет'})
+    
+    # Получаем обновленный баланс
+    new_balance = db.get_user_coins(user['id'])
+    
+    return jsonify({
+        'success': True,
+        'message': f'Снято {amount} теневых монет у пользователя {nickname}',
+        'new_balance': new_balance
+    })
 
 @app.route('/api/admin/add_prize', methods=['POST'])
 @admin_required
 def add_prize_admin():
-    """Добавить новый приз"""
-    data = request.get_json()
-    name = data.get('name')
-    image = data.get('image')
-    description = data.get('description', '')
-    
-    if not name or not image:
-        return jsonify({'success': False, 'message': 'Заполните название и имя файла'})
-    
-    if len(description) > 500:
-        return jsonify({'success': False, 'message': 'Описание слишком длинное (макс. 500 символов)'})
-    
-    prize_id = db.add_prize(name, image, description)
-    return jsonify({'success': True, 'prize_id': prize_id})
+    """Добавить новый приз с изображением"""
+    try:
+        # Получаем данные из формы
+        name = request.form.get('name')
+        description = request.form.get('description', '')
+        
+        if not name:
+            return jsonify({'success': False, 'message': 'Введите название приза'})
+        
+        if len(description) > 500:
+            return jsonify({'success': False, 'message': 'Описание слишком длинное (макс. 500 символов)'})
+        
+        # Проверяем наличие файла
+        if 'image' not in request.files:
+            return jsonify({'success': False, 'message': 'Не выбрано изображение'})
+        
+        file = request.files['image']
+        
+        if file.filename == '':
+            return jsonify({'success': False, 'message': 'Не выбрано изображение'})
+        
+        # Проверяем расширение файла
+        if not allowed_file(file.filename):
+            return jsonify({'success': False, 'message': 'Неподдерживаемый формат файла'})
+        
+        # Генерируем безопасное имя файла
+        filename = secure_filename(file.filename)
+        # Добавляем уникальный префикс, чтобы избежать перезаписи
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
+        
+        # Сохраняем файл
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        file.save(file_path)
+        
+        print(f"✅ Файл сохранен: {unique_filename}")
+        
+        # Добавляем приз в базу данных (сохраняем только имя файла)
+        prize_id = db.add_prize(name, unique_filename, description)
+        
+        return jsonify({'success': True, 'prize_id': prize_id, 'image': unique_filename})
+        
+    except Exception as e:
+        print(f"🔥 Ошибка при добавлении приза: {e}")
+        return jsonify({'success': False, 'message': f'Ошибка: {str(e)}'})
 
 @app.route('/api/admin/transactions')
 @admin_required

@@ -301,8 +301,26 @@ class RaffleDatabase:
     
     def add_shadow_coins(self, user_id, amount, reason="", admin_id=None):
         """Добавить теневые монеты пользователю (только для админа)"""
+        
+        # Защита от слишком больших чисел
+        MAX_COINS = 1000000  # Максимальное количество монет
+        
+        # Проверка на превышение лимита
+        if amount > MAX_COINS:
+            print(f"⚠️ Попытка добавить слишком много монет: {amount}")
+            return False
+        
         with self.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # Проверяем текущий баланс
+            cursor.execute("SELECT shadow_coins FROM users WHERE id = ?", (user_id,))
+            current = cursor.fetchone()[0]
+            
+            # Проверяем, что итоговый баланс не превысит лимит
+            if current + amount > MAX_COINS:
+                print(f"⚠️ Итоговый баланс превысит лимит: {current} + {amount} > {MAX_COINS}")
+                return False
             
             # Обновляем баланс
             cursor.execute(
@@ -315,6 +333,42 @@ class RaffleDatabase:
                 INSERT INTO coin_transactions (user_id, amount, reason, admin_id)
                 VALUES (?, ?, ?, ?)
             ''', (user_id, amount, reason, admin_id))
+            
+            conn.commit()
+            return True
+        
+    def remove_shadow_coins(self, user_id, amount, reason="", admin_id=None):
+    
+        # Защита от слишком больших чисел
+        MAX_COINS = 1000000
+        
+        if amount > MAX_COINS:
+            print(f"⚠️ Попытка снять слишком много монет: {amount}")
+            return False
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Проверяем текущий баланс
+            cursor.execute("SELECT shadow_coins FROM users WHERE id = ?", (user_id,))
+            current = cursor.fetchone()[0]
+            
+            # Проверяем, что баланс не уйдет в минус
+            if current - amount < 0:
+                print(f"⚠️ Недостаточно монет: текущий баланс {current}, попытка снять {amount}")
+                return False
+            
+            # Обновляем баланс (отрицательное число)
+            cursor.execute(
+                "UPDATE users SET shadow_coins = shadow_coins - ? WHERE id = ?",
+                (amount, user_id)
+            )
+            
+            # Записываем транзакцию (с отрицательным знаком)
+            cursor.execute('''
+                INSERT INTO coin_transactions (user_id, amount, reason, admin_id)
+                VALUES (?, ?, ?, ?)
+            ''', (user_id, -amount, reason, admin_id))
             
             conn.commit()
             return True
