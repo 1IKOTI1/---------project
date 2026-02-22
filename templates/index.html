@@ -96,8 +96,13 @@
         <h2>Регистрация</h2>
         
         <div class="form-group">
-            <label for="regNickname">Никнейм (обязательно)</label>
-            <input type="text" id="regNickname" placeholder="Введите никнейм">
+            <label for="regNickname">Никнейм (обязательно, 3-20 символов)</label>
+            <input type="text" id="regNickname" 
+                placeholder="Введите никнейм" 
+                minlength="3" 
+                maxlength="20" 
+                required>
+            <small id="nicknameCounter" class="char-counter">0/20</small>
         </div>
         
         <div class="form-group">  <!-- НОВОЕ ПОЛЕ -->

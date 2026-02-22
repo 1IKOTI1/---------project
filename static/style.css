@@ -213,15 +213,15 @@ h3 {
 /* Сетка призов */
 .prizes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
     margin: 30px 0;
 }
 
 .prize-card {
     background: rgba(20, 20, 30, 0.9);
     border-radius: 15px;
-    padding: 20px;
+    padding: 0;  /* Убираем внутренние отступы */
     text-align: center;
     border: 1px solid rgba(0, 255, 255, 0.2);
     box-shadow: 
@@ -230,6 +230,10 @@ h3 {
     transition: all 0.3s;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 280px;  /* Фиксированная высота */
+    cursor: pointer;
 }
 
 .prize-card::before {
@@ -249,27 +253,48 @@ h3 {
     border-color: rgba(0, 255, 255, 0.5);
     box-shadow: 
         0 15px 30px rgba(0, 0, 0, 0.6),
-        0 0 30px rgba(0, 255, 255, 0.3),
-        inset 0 0 30px rgba(0, 255, 255, 0.1);
+        0 0 30px rgba(0, 255, 255, 0.3);
 }
 
 .prize-card:hover::before {
     opacity: 0.2;
 }
 
+.prize-image-container {
+    height: 180px;  /* Фиксированная высота для изображения */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
 .prize-card img {
-    width: 100%;
-    height: 200px;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
-    margin-bottom: 15px;
-    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
-    transition: all 0.3s;
+    transition: transform 0.3s;
 }
 
 .prize-card:hover img {
     transform: scale(1.05);
-    filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
 }
+
+.prize-name {
+    padding: 12px 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(0, 255, 255, 0.2);
+    margin-top: auto;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 
 .prize-card h3 {
     margin: 10px 0;
@@ -717,3 +742,90 @@ a:hover::after {
 a:hover {
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: rgba(20, 20, 30, 0.95);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 255, 255, 0.2);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-close:hover {
+    background: rgba(255, 0, 0, 0.3);
+}
+
+.modal-image {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-image img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 10px;
+}
+
+.modal-title {
+    color: #00ffff;
+    font-size: 24px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.modal-description {
+    color: #e0e0e0;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+/* Стили для счетчиков */
+.char-counter {
+    display: block;
+    text-align: right;
+    color: #8080a0;
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+

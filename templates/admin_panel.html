@@ -272,8 +272,12 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="prizeDescription">Описание</label>
-                    <textarea id="prizeDescription" rows="3" placeholder="Описание приза"></textarea>
+                    <label for="prizeDescription">Описание (до 500 символов, необязательно)</label>
+                    <textarea id="prizeDescription" 
+                            rows="3" 
+                            maxlength="500"
+                            placeholder="Описание приза (можно оставить пустым)"></textarea>
+                    <small id="descCounter" class="char-counter">0/500</small>
                 </div>
                 
                 <button onclick="addPrize()" class="register-btn">✨ Добавить приз</button>

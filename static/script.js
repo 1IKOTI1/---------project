@@ -202,3 +202,30 @@ if (window.location.pathname === '/') {
         new RaffleGame();
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Счетчик для ника
+    const nicknameInput = document.getElementById('regNickname');
+    const nicknameCounter = document.getElementById('nicknameCounter');
+    
+    if (nicknameInput && nicknameCounter) {
+        nicknameInput.addEventListener('input', function() {
+            nicknameCounter.textContent = this.value.length + '/20';
+            if (this.value.length > 20) {
+                nicknameCounter.style.color = '#ff4444';
+            } else {
+                nicknameCounter.style.color = '#8080a0';
+            }
+        });
+    }
+    
+    // Счетчик для описания (если есть в админке)
+    const descInput = document.getElementById('prizeDescription');
+    const descCounter = document.getElementById('descCounter');
+    
+    if (descInput && descCounter) {
+        descInput.addEventListener('input', function() {
+            descCounter.textContent = this.value.length + '/500, можно оставить пустым';
+        });
+    }
+});

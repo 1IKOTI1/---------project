@@ -197,19 +197,56 @@ class ShadowRaffleGame {
             
             if (data.success && data.prizes.length > 0) {
                 grid.innerHTML = data.prizes.map(prize => `
-                    <div class="prize-card">
-                        <img src="/static/images/${prize.image}" alt="${prize.name}">
-                        <h3>${prize.name}</h3>
-                        <p>${prize.description || ''}</p>
+                    <div class="prize-card" onclick="window.gameInstance.showPrizeDetails(${JSON.stringify(prize).replace(/"/g, '&quot;')})">
+                        <div class="prize-image-container">
+                            <img src="/static/images/${prize.image}" alt="${prize.name}">
+                        </div>
+                        <div class="prize-name">${prize.name}</div>
                     </div>
                 `).join('');
             } else {
-                grid.innerHTML = '<p class="no-prizes">Все теневые карты разыграны!</p>';
+            grid.innerHTML = '<p class="no-prizes">Все теневые карты разыграны!</p>';
             }
         } catch (error) {
-            console.error('Ошибка загрузки призов:', error);
+        console.error('Ошибка загрузки призов:', error);
         }
     }
+
+    showPrizeDetails(prize) {
+    // Удаляем существующее модальное окно, если есть
+            const existingModal = document.querySelector('.modal-overlay');
+            if (existingModal) {
+                existingModal.remove();
+        }
+    
+    // Создаем модальное окно
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.display = 'flex';
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button>
+            <div class="modal-image">
+                <img src="/static/images/${prize.image}" alt="${prize.name}">
+            </div>
+            <h2 class="modal-title">${prize.name}</h2>
+            <div class="modal-description">
+                ${prize.description || 'Нет описания'}
+            </div>
+            <p style="color: #00ffff; text-align: center;">💰 1 теневая монета</p>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Закрытие по клику на фон
+    modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+        }
+        });
+        }
     
     async loadPublicWinners() {
         try {
@@ -323,7 +360,13 @@ class ShadowRaffleGame {
     
 }
 
+
+
 document.addEventListener('DOMContentLoaded', () => {
     new ShadowRaffleGame();
 });
+
+window.gameInstance = new ShadowRaffleGame();
+
+
    

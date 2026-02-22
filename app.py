@@ -365,7 +365,26 @@ def get_user_data():
             return jsonify({'success': False, 'message': 'Пользователь не найден'})
     except Exception as e:
         print(f"🔥 Ошибка: {e}")
-        return jsonify({'success': False, 'message': str(e)})      
+        return jsonify({'success': False, 'message': str(e)})   
+    
+@app.route('/api/admin/add_prize', methods=['POST'])
+@admin_required
+def add_prize_admin():
+    """Добавить новый приз"""
+    data = request.get_json()
+    name = data.get('name')
+    image = data.get('image')
+    description = data.get('description', '')
+    
+    if not name or not image:
+        return jsonify({'success': False, 'message': 'Заполните название и имя файла'})
+    
+    # Проверка длины описания (опционально)
+    if len(description) > 500:
+        return jsonify({'success': False, 'message': 'Описание слишком длинное (макс. 500 символов)'})
+    
+    prize_id = db.add_prize(name, image, description)
+    return jsonify({'success': True, 'prize_id': prize_id})   
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
