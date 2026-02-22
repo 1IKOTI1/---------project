@@ -481,7 +481,7 @@
         function quickAddCoins(nickname) {
             document.getElementById('coinNickname').value = nickname;
             document.getElementById('coinAmount').value = 10;
-            switchTab('add_coins');
+            switchTab('coins');  // ПРАВИЛЬНАЯ ВКЛАДКА
         }
         
         // Добавление монет
@@ -529,6 +529,60 @@
                 showMessage('Ошибка соединения с сервером', 'error');
             }
         }
+
+        // Снятие монет
+async function removeCoins() {
+    const nickname = document.getElementById('removeCoinNickname').value.trim();
+    const amount = parseInt(document.getElementById('removeCoinAmount').value);
+    const reason = document.getElementById('removeCoinReason').value.trim();
+    
+    if (!nickname) {
+        showMessage('Введите никнейм пользователя', 'error');
+        return;
+    }
+    
+    if (!amount || amount < 1) {
+        showMessage('Введите корректное количество монет', 'error');
+        return;
+    }
+    
+    // Проверка на максимальное количество
+    if (amount > 10000) {
+        showMessage('Нельзя снять больше 10000 монет за раз', 'error');
+        return;
+    }
+    
+    try {
+            const response = await fetch('/api/admin/remove_coins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nickname: nickname,
+                    amount: amount,
+                    reason: reason
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showMessage(data.message, 'success');
+                // Очищаем форму
+                document.getElementById('removeCoinNickname').value = '';
+                document.getElementById('removeCoinAmount').value = '10';
+                document.getElementById('removeCoinReason').value = '';
+                loadStats();
+                loadUsers();
+            } else {
+                showMessage(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showMessage('Ошибка соединения с сервером', 'error');
+        }
+    }
         
         // Загрузка призов
         async function loadPrizes() {
