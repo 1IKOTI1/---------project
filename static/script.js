@@ -4,13 +4,13 @@ class RaffleGame {
     constructor() {
         // Элементы формы входа
         this.loginNickname = document.getElementById('loginNickname');
-        this.loginPassword = document.getElementById('loginPassword');  // НОВОЕ
+        this.loginPassword = document.getElementById('loginPassword');
         this.loginBtn = document.getElementById('loginBtn');
         
         // Элементы формы регистрации
         this.regNickname = document.getElementById('regNickname');
-        this.regPassword = document.getElementById('regPassword');      // НОВОЕ
-        this.regConfirmPassword = document.getElementById('regConfirmPassword'); // НОВОЕ
+        this.regPassword = document.getElementById('regPassword');
+        this.regConfirmPassword = document.getElementById('regConfirmPassword');
         this.regTelegram = document.getElementById('regTelegram');
         this.regSiteUrl = document.getElementById('regSiteUrl');
         this.registerBtn = document.getElementById('registerBtn');
@@ -20,6 +20,9 @@ class RaffleGame {
         
         // Элемент для публичных победителей
         this.publicWinnersDiv = document.getElementById('publicWinners');
+        
+        // Счетчик для ника
+        this.nicknameCounter = document.getElementById('nicknameCounter');
         
         // Инициализация
         this.init();
@@ -35,14 +38,51 @@ class RaffleGame {
         this.loginPassword.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.handleLogin();
         });
+        
+        // Инициализация счетчика ника
+        this.initNicknameCounter();
+    }
+    
+    initNicknameCounter() {
+        if (this.regNickname && this.nicknameCounter) {
+            this.regNickname.addEventListener('input', () => {
+                const length = this.regNickname.value.length;
+                this.nicknameCounter.textContent = `${length}/20`;
+                
+                if (length > 20) {
+                    this.nicknameCounter.style.color = '#ff4444';
+                    this.nicknameCounter.classList.add('danger');
+                } else if (length > 15) {
+                    this.nicknameCounter.style.color = '#ffaa00';
+                    this.nicknameCounter.classList.add('warning');
+                } else {
+                    this.nicknameCounter.style.color = '#8080a0';
+                    this.nicknameCounter.classList.remove('warning', 'danger');
+                }
+            });
+            
+            // Первоначальное обновление
+            this.nicknameCounter.textContent = `0/20`;
+        }
     }
     
     async handleLogin() {
         const nickname = this.loginNickname.value.trim();
-        const password = this.loginPassword.value;  // НОВОЕ
+        const password = this.loginPassword.value;
         
         if (!nickname || !password) {
             this.showMessage('Введите никнейм и пароль', 'error');
+            return;
+        }
+        
+        // Проверка длины ника
+        if (nickname.length < 3) {
+            this.showMessage('Никнейм должен быть не менее 3 символов', 'error');
+            return;
+        }
+        
+        if (nickname.length > 20) {
+            this.showMessage('Никнейм должен быть не более 20 символов', 'error');
             return;
         }
         
@@ -50,7 +90,7 @@ class RaffleGame {
         this.loginBtn.textContent = 'Вход...';
         
         try {
-            const response = await fetch('/api/login_with_password', {  // ИЗМЕНЕНО
+            const response = await fetch('/api/login_with_password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -72,7 +112,7 @@ class RaffleGame {
                 }, 1000);
             } else {
                 this.showMessage(data.message, 'error');
-                this.loginPassword.value = ''; // Очищаем пароль при ошибке
+                this.loginPassword.value = '';
             }
         } catch (error) {
             this.showMessage('Ошибка соединения с сервером', 'error');
@@ -84,14 +124,25 @@ class RaffleGame {
     
     async handleRegister() {
         const nickname = this.regNickname.value.trim();
-        const password = this.regPassword.value;              // НОВОЕ
-        const confirmPassword = this.regConfirmPassword.value; // НОВОЕ
+        const password = this.regPassword.value;
+        const confirmPassword = this.regConfirmPassword.value;
         const telegram = this.regTelegram.value.trim();
         const siteUrl = this.regSiteUrl.value.trim();
         
         // Проверки
         if (!nickname) {
             this.showMessage('Введите никнейм', 'error');
+            return;
+        }
+        
+        // Проверка длины ника
+        if (nickname.length < 3) {
+            this.showMessage('Никнейм должен быть не менее 3 символов', 'error');
+            return;
+        }
+        
+        if (nickname.length > 20) {
+            this.showMessage('Никнейм должен быть не более 20 символов', 'error');
             return;
         }
         
@@ -120,7 +171,7 @@ class RaffleGame {
         this.registerBtn.textContent = 'Регистрация...';
         
         try {
-            const response = await fetch('/api/register_with_password', {  // ИЗМЕНЕНО
+            const response = await fetch('/api/register_with_password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -196,36 +247,9 @@ class RaffleGame {
     }
 }
 
-// Запускаем только на главной странице
+// Запускаем только на главной странице - ОДИН РАЗ
 if (window.location.pathname === '/') {
     document.addEventListener('DOMContentLoaded', () => {
         new RaffleGame();
     });
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Счетчик для ника
-    const nicknameInput = document.getElementById('regNickname');
-    const nicknameCounter = document.getElementById('nicknameCounter');
-    
-    if (nicknameInput && nicknameCounter) {
-        nicknameInput.addEventListener('input', function() {
-            nicknameCounter.textContent = this.value.length + '/20';
-            if (this.value.length > 20) {
-                nicknameCounter.style.color = '#ff4444';
-            } else {
-                nicknameCounter.style.color = '#8080a0';
-            }
-        });
-    }
-    
-    // Счетчик для описания (если есть в админке)
-    const descInput = document.getElementById('prizeDescription');
-    const descCounter = document.getElementById('descCounter');
-    
-    if (descInput && descCounter) {
-        descInput.addEventListener('input', function() {
-            descCounter.textContent = this.value.length + '/500, можно оставить пустым';
-        });
-    }
-});

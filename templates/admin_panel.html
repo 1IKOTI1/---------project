@@ -276,11 +276,15 @@
                     <textarea id="prizeDescription" 
                             rows="3" 
                             maxlength="500"
-                            placeholder="Описание приза (можно оставить пустым)"></textarea>
-                    <small id="descCounter" class="char-counter">0/500</small>
+                            placeholder="Описание приза (можно оставить пустым)"
+                            oninput="updateDescCounter()"></textarea>
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                        <small id="descCounter" class="char-counter">0/500</small>
+                        <small id="descWarning" style="color: #ffaa00; display: none;">⚠️ Осталось мало места</small>
+                    </div>
                 </div>
                 
-                <button onclick="addPrize()" class="register-btn">✨ Добавить приз</button>
+                <button onclick="addPrize()" class="register-btn" id="addPrizeBtn">✨ Добавить приз</button>
             </div>
         </div>
         
@@ -551,8 +555,48 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Ошибка загрузки</td></tr>';
             }
         }
+
+        // Функция для обновления счетчика описания
+        function updateDescCounter() {
+            const textarea = document.getElementById('prizeDescription');
+            const counter = document.getElementById('descCounter');
+            const warning = document.getElementById('descWarning');
+            const addBtn = document.getElementById('addPrizeBtn');
+            
+            if (!textarea || !counter) return;
+            
+            const currentLength = textarea.value.length;
+            
+            // Обновляем текст счетчика
+            counter.textContent = `${currentLength}/500`;
+            
+            // Меняем цвет и блокируем кнопку в зависимости от длины
+            if (currentLength > 500) {
+                counter.style.color = '#ff4444';
+                counter.classList.add('danger');
+                if (warning) {
+                    warning.style.display = 'inline';
+                    warning.textContent = '❌ Превышен лимит!';
+                    warning.style.color = '#ff4444';
+                }
+                if (addBtn) addBtn.disabled = true;
+            } else if (currentLength > 450) {
+                counter.style.color = '#ffaa00';
+                counter.classList.add('warning');
+                if (warning) {
+                    warning.style.display = 'inline';
+                    warning.textContent = '⚠️ Осталось мало места';
+                    warning.style.color = '#ffaa00';
+                }
+                if (addBtn) addBtn.disabled = false;
+            } else {
+                counter.style.color = '#8080a0';
+                counter.classList.remove('warning', 'danger');
+                if (warning) warning.style.display = 'none';
+                if (addBtn) addBtn.disabled = false;
+            }
+        }
         
-        // Добавление приза
         async function addPrize() {
             const name = document.getElementById('prizeName').value.trim();
             const image = document.getElementById('prizeImage').value.trim();
@@ -560,6 +604,12 @@
             
             if (!name || !image) {
                 showMessage('Заполните название и имя файла изображения', 'error');
+                return;
+            }
+            
+            // Проверка длины описания
+            if (description.length > 500) {
+                showMessage(`Описание слишком длинное (${description.length}/500)`, 'error');
                 return;
             }
             
@@ -580,15 +630,18 @@
                 
                 if (data.success) {
                     showMessage('Приз успешно добавлен!', 'success');
+                    // Очищаем форму
                     document.getElementById('prizeName').value = '';
                     document.getElementById('prizeImage').value = '';
                     document.getElementById('prizeDescription').value = '';
+                    updateDescCounter(); // Обновляем счетчик
                     loadPrizes();
                     loadStats();
                 } else {
-                    showMessage('Ошибка при добавлении приза', 'error');
+                    showMessage(data.message || 'Ошибка при добавлении приза', 'error');
                 }
             } catch (error) {
+                console.error('Ошибка:', error);
                 showMessage('Ошибка соединения с сервером', 'error');
             }
         }
@@ -600,6 +653,13 @@
             loadPrizes();
             loadWinners();
             loadTransactions();
+
+            updateDescCounter();
+    
+            const descTextarea = document.getElementById('prizeDescription');
+            if (descTextarea) {
+                descTextarea.addEventListener('input', updateDescCounter);
+            }
         });
     </script>
 </body>
