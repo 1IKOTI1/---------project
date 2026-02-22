@@ -130,6 +130,38 @@
                 grid-template-columns: 1fr;
             }
         }
+
+                /* Стили для таблицы призов */
+        #prizesTable {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #prizesTable th, #prizesTable td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 8px;
+        }
+
+        /* Фиксированная ширина колонок */
+        #prizesTable th:nth-child(1) { width: 5%; }   /* ID */
+        #prizesTable th:nth-child(2) { width: 20%; }  /* Название */
+        #prizesTable th:nth-child(3) { width: 15%; }  /* Изображение */
+        #prizesTable th:nth-child(4) { width: 30%; }  /* Описание */
+        #prizesTable th:nth-child(5) { width: 10%; }  /* Доступен */
+        #prizesTable th:nth-child(6) { width: 20%; }  /* Дата */
+
+        /* Ховер для просмотра полного текста */
+        #prizesTable td:hover {
+            overflow: visible;
+            white-space: normal;
+            word-wrap: break-word;
+            background: rgba(0, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
@@ -262,7 +294,9 @@
                 
                 <div class="form-group">
                     <label for="prizeName">Название приза</label>
-                    <input type="text" id="prizeName" placeholder="Например: Теневая карта #6">
+                    <input type="text" id="prizeName" 
+                        placeholder="Например: Теневая карта #6" 
+                        maxlength="30">
                 </div>
                 
                 <div class="form-group">
@@ -483,9 +517,9 @@
                     tbody.innerHTML = data.prizes.map(prize => `
                         <tr>
                             <td>${prize.id}</td>
-                            <td>${prize.name}</td>
-                            <td>${prize.image}</td>
-                            <td>${prize.description || '-'}</td>
+                            <td title="${prize.name}">${prize.name}</td>
+                            <td title="${prize.image}">${prize.image}</td>
+                            <td title="${prize.description || ''}">${(prize.description || '').substring(0, 30)}${prize.description && prize.description.length > 30 ? '...' : ''}</td>
                             <td style="color: ${prize.available ? '#00ff00' : '#ff4444'}">
                                 ${prize.available ? '✅ Доступен' : '❌ Разыгран'}
                             </td>

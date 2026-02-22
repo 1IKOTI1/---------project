@@ -117,14 +117,18 @@
         
         <div class="form-group">
             <label for="regTelegram">Telegram (@username)</label>
-            <input type="text" id="regTelegram" placeholder="@username">
-            <small>Или заполните ссылку на сайт</small>
+            <input type="text" id="regTelegram" 
+                placeholder="@username" 
+                maxlength="15">
+            <small> (макс. 15 символов)</small>
         </div>
         
         <div class="form-group">
-            <label for="regSiteUrl">Ссылка на профиль</label>
-            <input type="url" id="regSiteUrl" placeholder="https://example.com/profile">
-            <small>Или заполните Telegram</small>
+            <label for="regSiteUrl">Ссылка на профиль Remanga</label>
+            <input type="url" id="regSiteUrl" 
+                placeholder="https://remanga.org/user/48443/about"
+                maxlength="100">
+            <small>Формат: https://remanga.org/user/ID/about (до 100 символов)</small>
         </div>
         
         <button id="registerBtn" class="register-btn">📝 Зарегистрироваться</button>

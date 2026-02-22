@@ -160,11 +160,33 @@ class RaffleGame {
             this.showMessage('Заполните Telegram или ссылку на профиль', 'error');
             return;
         }
+
+        // Проверка длины Telegram
+        if (telegram && telegram.length > 15) {
+            this.showMessage('Telegram не может быть длиннее 15 символов', 'error');
+            return;
+        }
         
         // Форматируем Telegram
         let formattedTelegram = telegram;
         if (telegram && !telegram.startsWith('@')) {
             formattedTelegram = '@' + telegram;
+        }
+
+        // Проверка ссылки Remanga
+        if (siteUrl) {
+            // Проверка длины
+            if (siteUrl.length > 100) {
+                this.showMessage('Ссылка слишком длинная (макс. 100 символов)', 'error');
+                return;
+            }
+            
+            // Проверка формата Remanga
+            const remangaRegex = /^https:\/\/remanga\.org\/user\/[0-9]+\/about$/;
+            if (!remangaRegex.test(siteUrl)) {
+                this.showMessage('Ссылка должна быть в формате: https://remanga.org/user/ID/about', 'error');
+                return;
+            }
         }
         
         this.registerBtn.disabled = true;
