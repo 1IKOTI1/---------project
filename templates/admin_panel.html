@@ -262,6 +262,50 @@
                 </tbody>
             </table>
         </div>
+                <!-- Вкладка: Управление монетами -->
+        <div id="tab-coins" class="tab-content">
+            <div class="form-section">
+                <h2>💰 Добавить монеты</h2>
+                
+                <div class="form-group">
+                    <label for="coinNickname">Никнейм пользователя</label>
+                    <input type="text" id="coinNickname" placeholder="Введите никнейм">
+                </div>
+                
+                <div class="form-group">
+                    <label for="coinAmount">Количество монет (макс. 10 000)</label>
+                    <input type="number" id="coinAmount" value="10" min="1" max="10000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="coinReason">Причина (необязательно)</label>
+                    <input type="text" id="coinReason" placeholder="Например: бонус за активность">
+                </div>
+                
+                <button onclick="addCoins()" class="register-btn" style="background: linear-gradient(135deg, #1a3a1a, #2a4a2a);">💎 Добавить монеты</button>
+            </div>
+            
+            <div class="form-section" style="margin-top: 20px;">
+                <h2>💸 Снять монеты</h2>
+                
+                <div class="form-group">
+                    <label for="removeCoinNickname">Никнейм пользователя</label>
+                    <input type="text" id="removeCoinNickname" placeholder="Введите никнейм">
+                </div>
+                
+                <div class="form-group">
+                    <label for="removeCoinAmount">Количество монет (макс. 10 000)</label>
+                    <input type="number" id="removeCoinAmount" value="10" min="1" max="10000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="removeCoinReason">Причина (необязательно)</label>
+                    <input type="text" id="removeCoinReason" placeholder="Например: штраф">
+                </div>
+                
+                <button onclick="removeCoins()" class="register-btn" style="background: linear-gradient(135deg, #3a1a1a, #4a2a2a);">💸 Снять монеты</button>
+            </div>
+        </div>
         
         
         <!-- Вкладка: Добавить приз -->
