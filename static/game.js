@@ -2,30 +2,30 @@ class ShadowRaffleGame {
     constructor() {
         this.currentUser = null;
         this.currentSection = 'game';
+        this.isDrawing = false; 
         
-        this.loadUserFromStorage();
         this.init();
+        
     }
     
     async init() {
-    await this.loadUserFromStorage();  // Ждем загрузки пользователя
-    
-    // Обработка навигации
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if (e.target.getAttribute('href') === '/logout') {
-                this.logout();
-                e.preventDefault();
-            } else {
-                e.preventDefault();
-                this.loadSection(e.target.getAttribute('data-section'));
-            }
+        await this.loadUserFromStorage(); 
+        // Обработка навигации
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (e.target.getAttribute('href') === '/logout') {
+                    this.logout();
+                    e.preventDefault();
+                } else {
+                    e.preventDefault();
+                    this.loadSection(e.target.getAttribute('data-section'));
+                }
+            });
         });
-    });
-    
-    // Загружаем начальную секцию
-    this.loadSection('game');
-}
+        
+        // Загружаем начальную секцию
+        this.loadSection('game');
+    }
     
     async loadUserFromStorage() {
     const savedUser = localStorage.getItem('shadowUser');
@@ -86,23 +86,6 @@ class ShadowRaffleGame {
         if (contactsEl) contactsEl.textContent = contacts.join(' • ');
     }
     
-    async init() {
-        // Обработка навигации
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (e.target.getAttribute('href') === '/logout') {
-                    this.logout();
-                    e.preventDefault();
-                } else {
-                    e.preventDefault();
-                    this.loadSection(e.target.getAttribute('data-section'));
-                }
-            });
-        });
-        
-        // Загружаем начальную секцию
-        this.loadSection('game');
-    }
     
     async loadSection(section) {
         this.currentSection = section;
@@ -300,6 +283,12 @@ class ShadowRaffleGame {
     }
     
     async handleDraw() {
+
+            if (this.isDrawing) {
+                console.log('⚠️ Розыгрыш уже выполняется');
+                return;
+        }
+
         const drawBtn = document.getElementById('drawBtn');
         drawBtn.disabled = true;
         drawBtn.textContent = 'Крутим...';
@@ -363,10 +352,10 @@ class ShadowRaffleGame {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    new ShadowRaffleGame();
+    window.gameInstance = new ShadowRaffleGame();
 });
 
-window.gameInstance = new ShadowRaffleGame();
+
 
 
    
