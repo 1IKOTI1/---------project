@@ -172,68 +172,94 @@ class ShadowRaffleGame {
     }
     
         async loadPrizes() {
-            try {
-                const response = await fetch('/api/prizes');
-                const data = await response.json();
+        try {
+            const response = await fetch('/api/prizes');
+            const data = await response.json();
+            
+            const grid = document.getElementById('prizesGrid');
+            const spinBtn = document.getElementById('spinButton');
+            
+            if (data.success) {
+                // Сохраняем призы для рулетки
+                this.rouletteCards = data.prizes;
                 
-                const grid = document.getElementById('prizesGrid');
-                const spinBtn = document.getElementById('spinButton');
-                
-                if (data.success) {
-                    // Сохраняем призы для рулетки
-                    this.rouletteCards = data.prizes;
-                    
-                    // Обновляем отображение в сетке призов
-                    if (grid) {
-                        if (data.prizes.length > 0) {
-                            grid.innerHTML = data.prizes.map(prize => `
-                                <div class="prize-card" onclick="window.gameInstance.showPrizeDetails(${JSON.stringify(prize).replace(/"/g, '&quot;')})">
-                                    <img src="/static/images/${prize.image}" alt="${prize.name}">
-                                </div>
-                            `).join('');
-                        } else {
-                            grid.innerHTML = '<p class="no-prizes">Все карты разыграны!</p>';
-                        }
-                    }
-                    
-                    // Обновляем рулетку
-                    this.initRoulette();
-                    
-                    // Обновляем кнопку
-                    if (spinBtn) {
-                        if (data.prizes.length === 0) {
-                            spinBtn.textContent = '🎰 ПРИЗЫ ЗАКОНЧИЛИСЬ 🎰';
-                            spinBtn.disabled = true;
-                        } else {
-                            spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
-                            spinBtn.disabled = false;
-                        }
+                // Обновляем отображение в сетке призов
+                if (grid) {
+                    if (data.prizes.length > 0) {
+                        grid.innerHTML = data.prizes.map(prize => `
+                            <div class="prize-card" onclick="window.gameInstance.showPrizeDetails(${JSON.stringify(prize).replace(/"/g, '&quot;')})">
+                                <img src="/static/images/${prize.image}" alt="${prize.name}">
+                            </div>
+                        `).join('');
+                    } else {
+                        grid.innerHTML = '<p class="no-prizes">✨ Все карты разыграны! ✨</p>';
                     }
                 }
-            } catch (error) {
-                console.error('Ошибка загрузки призов:', error);
+                
+                // Обновляем кнопку
+                if (spinBtn) {
+                    if (data.prizes.length === 0) {
+                        spinBtn.textContent = '✨ ВСЕ КАРТЫ РАЗЫГРАНЫ ✨';
+                        spinBtn.disabled = true;
+                    } else {
+                        spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
+                        spinBtn.disabled = false;
+                    }
+                }
+                
+                // Обновляем рулетку ТОЛЬКО если не идет прокрутка
+                if (!this.isSpinning) {
+                    this.initRoulette();
+                }
             }
+
+        } catch (error) {
+            console.error('Ошибка загрузки призов:', error);
+        }
+    }
+
+        safeRefreshRoulette() {
+            const track = document.getElementById('rouletteTrack');
+            if (!track) return;
+            
+            if (this.isSpinning) {
+                // Если рулетка крутится, планируем обновление после остановки
+                setTimeout(() => this.safeRefreshRoulette(), 500);
+                return;
+            }
+            
+            this.initRoulette();
         }
         
     initRoulette() {
-        const track = document.getElementById('rouletteTrack');
-        if (!track) return;
-        
-        // Проверяем, есть ли призы
-        if (!this.rouletteCards || this.rouletteCards.length === 0) {
-            track.innerHTML = '<div class="roulette-empty">Все призы разыграны</div>';
-            return;
-        }
-        
-        // Создаем 3 копии призов для эффекта бесконечной прокрутки
-        const cards = [...this.rouletteCards, ...this.rouletteCards, ...this.rouletteCards];
-        
-        track.innerHTML = cards.map(prize => `
-            <div class="roulette-card">
-                <img src="/static/images/${prize.image}" alt="${prize.name}">
-            </div>
-        `).join('');
+    const track = document.getElementById('rouletteTrack');
+    if (!track) return;
+    
+    // Проверяем, есть ли призы
+    if (!this.rouletteCards || this.rouletteCards.length === 0) {
+        track.innerHTML = '<div class="roulette-empty">✨ Все карты разыграны! ✨</div>';
+        return;
     }
+    
+    // Создаем 5 копий призов для более плавной прокрутки
+    const cards = [
+        ...this.rouletteCards, 
+        ...this.rouletteCards, 
+        ...this.rouletteCards,
+        ...this.rouletteCards,
+        ...this.rouletteCards
+    ];
+    
+    track.innerHTML = cards.map(prize => `
+        <div class="roulette-card">
+            <img src="/static/images/${prize.image}" alt="${prize.name}">
+        </div>
+    `).join('');
+    
+    // Сбрасываем позицию в начало
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0)';
+}
 
         // Показать детали приза в модальном окне
     showPrizeDetails(prize) {
@@ -358,63 +384,70 @@ class ShadowRaffleGame {
             track.style.transform = `translateX(${targetPosition}px)`;
 
             // Ждем окончания анимации
-            setTimeout(async () => {
-                try {
-                    // Отправляем запрос на сервер для розыгрыша
-                    const response = await fetch('/api/draw', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ user_id: this.currentUser.id })
-                    });
+            // Ждем окончания анимации
+        setTimeout(async () => {
+            try {
+                // Отправляем запрос на сервер для розыгрыша
+                const response = await fetch('/api/draw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: this.currentUser.id })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Обновляем баланс
+                    this.currentUser.shadow_coins = data.new_balance;
+                    localStorage.setItem('shadowUser', JSON.stringify(this.currentUser));
+                    document.getElementById('userCoins').textContent = data.new_balance;
                     
-                    const data = await response.json();
+                    // Показываем модальное окно с выигрышем
+                    this.showWinModal(data.prize);
                     
-                    if (data.success) {
-                        // Обновляем баланс
-                        this.currentUser.shadow_coins = data.new_balance;
-                        localStorage.setItem('shadowUser', JSON.stringify(this.currentUser));
-                        document.getElementById('userCoins').textContent = data.new_balance;
-                        
-                        // Показываем модальное окно с выигрышем
-                        this.showWinModal(data.prize);
-                        
-                        // Обновляем список призов
-                        await this.loadPrizes();
-                        await this.loadPublicWinners();
-                        
-                        // Сбрасываем рулетку
-                        setTimeout(() => {
-                            track.style.transition = 'none';
-                            track.style.transform = 'translateX(0)';
-                            this.initRoulette();
-                        }, 500);
-                        
-                    } else {
-                        this.showMessage(data.message, 'error');
-                        // Сбрасываем рулетку
+                    // Обновляем список призов (это изменит rouletteCards)
+                    await this.loadPrizes();
+                    await this.loadPublicWinners();
+                    
+                    // СБРАСЫВАЕМ ПОЗИЦИЮ ТОЛЬКО ПОСЛЕ ТОГО, КАК ЗАГРУЗИЛИ НОВЫЕ ПРИЗЫ
+                    if (this.rouletteCards.length > 0) {
+                        // Если призы еще есть, просто возвращаем трек в начало
                         track.style.transition = 'none';
                         track.style.transform = 'translateX(0)';
+                        // НЕ вызываем initRoulette() снова, просто оставляем текущий трек
+                        // Но если нужно обновить картинки (например, изменились призы), то:
+                        setTimeout(() => {
+                            this.initRoulette(); // Пересоздаем трек с новыми призами
+                        }, 50);
+                    } else {
+                        // Если призов больше нет, показываем заглушку
+                        track.style.transition = 'none';
+                        track.style.transform = 'translateX(0)';
+                        this.initRoulette(); // Покажет "Все призы разыграны"
                     }
-                } catch (error) {
-                    console.error('Ошибка:', error);
-                    this.showMessage('Ошибка при розыгрыше', 'error');
+                    
+                } else {
+                    this.showMessage(data.message, 'error');
+                    // При ошибке возвращаем трек в начало
                     track.style.transition = 'none';
                     track.style.transform = 'translateX(0)';
-                } finally {
-                    this.isSpinning = false;
-                    spinBtn.disabled = false;
-                    
-                    // Обновляем текст кнопки в зависимости от наличия призов
-                    if (this.rouletteCards.length === 0) {
-                        spinBtn.textContent = '🎰 ПРИЗЫ ЗАКОНЧИЛИСЬ 🎰';
-                        spinBtn.disabled = true;
-                    } else {
-                        spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
-                    }
                 }
-            }, 3000);
+            } catch (error) {
+                console.error('Ошибка:', error);
+                this.showMessage('Ошибка при розыгрыше', 'error');
+                track.style.transition = 'none';
+                track.style.transform = 'translateX(0)';
+            } finally {
+                this.isSpinning = false;
+                const spinBtn = document.getElementById('spinButton');
+                if (spinBtn) {
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
+                }
+            }
+        }, 3000); // Время анимации
         }
 
         async loadUserWins() {
