@@ -345,28 +345,53 @@ class ShadowRaffleGame {
     }
 
        async spinRoulette() {
-            // ... (начальные проверки остаются теми же) ...
-            
+            if (this.isSpinning) {
+                this.showMessage('Рулетка уже крутится!', 'error');
+                return;
+            }
+
+            if (!this.currentUser || this.currentUser.shadow_coins < 1) {
+                this.showMessage('Недостаточно монет!', 'error');
+                return;
+            }
+
+            const spinBtn = document.getElementById('spinButton');
+            const track = document.getElementById('rouletteTrack');
+
+            if (!track) {
+                this.showMessage('Ошибка загрузки рулетки', 'error');
+                return;
+            }
+
+            if (!this.rouletteCards || this.rouletteCards.length === 0) {
+                this.showMessage('Все призы разыграны!', 'error');
+                spinBtn.disabled = true;
+                spinBtn.textContent = '🎰 ПРИЗЫ ЗАКОНЧИЛИСЬ 🎰';
+                return;
+            }
+
             this.isSpinning = true;
             spinBtn.disabled = true;
             spinBtn.textContent = '🎰 Крутим... 🎰';
 
-            const uniquePrizes = this.rouletteCards.length;
+            // ПОЛУЧАЕМ СЛУЧАЙНЫЙ ПРИЗ
+            const prizeIndex = Math.floor(Math.random() * this.rouletteCards.length);
+            this.winningPrize = this.rouletteCards[prizeIndex];
+            
+            console.log('🎯 Выигрышный приз индекс:', prizeIndex);
+
+            // КОНСТАНТЫ
             const cardWidth = 175;
             const containerWidth = 1200;
             const cardsVisible = Math.ceil(containerWidth / cardWidth);
             
-            // ВЫЧИСЛЯЕМ, СКОЛЬКО КОПИЙ СЕЙЧАС В ТРЕКЕ
-            const track = document.getElementById('rouletteTrack');
+            // ВЫЧИСЛЯЕМ КОЛИЧЕСТВО КОПИЙ В ТРЕКЕ
             const totalCardsInTrack = track.children.length;
+            const uniquePrizes = this.rouletteCards.length;
             const copiesCount = totalCardsInTrack / uniquePrizes;
             
             console.log(`📊 Всего карт в треке: ${totalCardsInTrack}, копий: ${copiesCount}`);
 
-            // ИНДЕКС ПОБЕДИТЕЛЯ
-            const prizeIndex = Math.floor(Math.random() * uniquePrizes);
-            this.winningPrize = this.rouletteCards[prizeIndex];
-            
             // ВЫБИРАЕМ ЦЕЛЕВУЮ КОПИЮ (примерно 60% от общего количества копий)
             const targetCopyIndex = Math.floor(copiesCount * 0.6);
             const targetCardIndex = (targetCopyIndex * uniquePrizes) + prizeIndex;
@@ -401,7 +426,54 @@ class ShadowRaffleGame {
             }, 3300);
 
             setTimeout(async () => {
-                // ... (обработка результата остается той же) ...
+                try {
+                    const response = await fetch('/api/draw', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ user_id: this.currentUser.id })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.currentUser.shadow_coins = data.new_balance;
+                        localStorage.setItem('shadowUser', JSON.stringify(this.currentUser));
+                        document.getElementById('userCoins').textContent = data.new_balance;
+                        
+                        this.showWinModal(data.prize);
+                        
+                        await this.loadPrizes();
+                        await this.loadPublicWinners();
+                        
+                        setTimeout(() => {
+                            track.style.transition = 'transform 0.5s ease';
+                            track.style.transform = 'translateX(0)';
+                            
+                            setTimeout(() => {
+                                track.style.transition = 'none';
+                                if (this.rouletteCards.length > 0) {
+                                    this.initRoulette();
+                                }
+                            }, 500);
+                        }, 300);
+                        
+                    } else {
+                        this.showMessage(data.message, 'error');
+                        track.style.transition = 'transform 0.5s ease';
+                        track.style.transform = 'translateX(0)';
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    this.showMessage('Ошибка при розыгрыше', 'error');
+                    track.style.transition = 'transform 0.5s ease';
+                    track.style.transform = 'translateX(0)';
+                } finally {
+                    this.isSpinning = false;
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
+                }
             }, 4000);
         }
 
