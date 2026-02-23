@@ -389,9 +389,9 @@ class ShadowRaffleGame {
             
             // Центрируем карту: чтобы карта с индексом targetCardIndexInTrack была по центру
             // Формула: -(индекс * ширина) + (ширина контейнера/2 - ширина карты/2)
-            let centerPosition = -(targetCardIndexInTrack * cardWidth) + (containerWidth / 2 - cardWidth / 2);
+            let targetPosition = -(targetCardIndexInTrack * cardWidth) + (containerWidth / 2 - cardWidth / 2);
             
-            console.log(`📊 Позиция для центрирования: ${centerPosition}`);
+            console.log(`📊 Позиция для центрирования: ${targetPosition}`);
             
             // Добавляем случайные обороты
             // Полный оборот = все 5 копий * количество призов * ширину
@@ -404,7 +404,7 @@ class ShadowRaffleGame {
             console.log(`📊 Оборотов: ${spinCount}, дистанция: ${extraSpinDistance}`);
             
             // Итоговая позиция (двигаемся влево, поэтому минус)
-            const targetPosition = centerPosition - extraSpinDistance;
+            targetPosition = targetPosition - extraSpinDistance; // ИСПРАВЛЕНО: используем let и переназначаем
             
             console.log(`📊 Финальная позиция: ${targetPosition}`);
 
