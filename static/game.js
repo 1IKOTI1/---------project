@@ -382,16 +382,18 @@ class ShadowRaffleGame {
             // Формула: -(индекс * ширина) + (половина контейнера - половина карты)
             let targetPosition = -(targetCardIndex * cardWidth) + (containerWidth / 2 - cardWidth / 2);
             
-            // Добавляем случайные дополнительные обороты (3-5 полных прокруток)
+            // ВАЖНО: Добавляем случайные дополнительные обороты (3-5 полных прокруток)
             // Полный оборот = общее количество карт * ширина карты
-            const fullSpinWidth = this.rouletteCards.length * copiesCount * cardWidth;
-            const extraSpins = (2 + Math.floor(Math.random() * 3)) * fullSpinWidth; // 2-4 полных оборота
-            targetPosition -= extraSpins;
+            const fullSpinWidth = this.rouletteCards.length * cardWidth; // Ширина одного набора карт (не всех копий!)
+            const extraSpinsCount = 3 + Math.floor(Math.random() * 3); // 3-5 полных оборотов
+            const extraSpinDistance = extraSpinsCount * fullSpinWidth * copiesCount; // Умножаем на количество копий для плавности
             
-            console.log(`📊 Расчет: targetCardIndex=${targetCardIndex}, позиция=${targetPosition}`);
+            targetPosition -= extraSpinDistance;
+            
+            console.log(`📊 Расчет: targetCardIndex=${targetCardIndex}, позиция=${targetPosition}, оборотов=${extraSpinsCount}`);
 
-            // ЗАПУСКАЕМ АНИМАЦИЮ
-            track.style.transition = 'transform 3s cubic-bezier(0.2, 0.9, 0.3, 1)';
+            // ЗАПУСКАЕМ АНИМАЦИЮ - увеличиваем время до 4 секунд для плавности
+            track.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.3, 1)';
             track.style.transform = `translateX(${targetPosition}px)`;
 
             // Ждем окончания анимации
@@ -425,9 +427,9 @@ class ShadowRaffleGame {
                         await this.loadPrizes();
                         await this.loadPublicWinners();
                         
-                        // Плавно возвращаем рулетку в начало
+                        // Плавно возвращаем рулетку в начало через небольшую задержку
                         setTimeout(() => {
-                            track.style.transition = 'transform 0.5s ease';
+                            track.style.transition = 'transform 0.8s ease';
                             track.style.transform = 'translateX(0)';
                             
                             setTimeout(() => {
@@ -436,32 +438,32 @@ class ShadowRaffleGame {
                                 if (this.rouletteCards.length > 0) {
                                     this.initRoulette();
                                 }
-                            }, 500);
-                        }, 300);
+                            }, 800);
+                        }, 500);
                         
                     } else {
                         this.showMessage(data.message, 'error');
                         // При ошибке возвращаем трек в начало
-                        track.style.transition = 'transform 0.5s ease';
+                        track.style.transition = 'transform 0.8s ease';
                         track.style.transform = 'translateX(0)';
                         setTimeout(() => {
                             track.style.transition = 'none';
-                        }, 500);
+                        }, 800);
                     }
                 } catch (error) {
                     console.error('Ошибка:', error);
                     this.showMessage('Ошибка при розыгрыше', 'error');
-                    track.style.transition = 'transform 0.5s ease';
+                    track.style.transition = 'transform 0.8s ease';
                     track.style.transform = 'translateX(0)';
                     setTimeout(() => {
                         track.style.transition = 'none';
-                    }, 500);
+                    }, 800);
                 } finally {
                     this.isSpinning = false;
                     spinBtn.disabled = false;
                     spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
                 }
-            }, 3000); // Время анимации
+            }, 4000); // Увеличили до 4 секунд
         }
 
         async loadUserWins() {
