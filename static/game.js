@@ -324,7 +324,7 @@ class ShadowRaffleGame {
         }, 100);
     }
 
-        async spinRoulette() {
+       async spinRoulette() {
             if (this.isSpinning) {
                 this.showMessage('Рулетка уже крутится!', 'error');
                 return;
@@ -355,45 +355,56 @@ class ShadowRaffleGame {
             spinBtn.textContent = '🎰 Крутим... 🎰';
 
             // ДАННЫЕ ИЗ ДИАГНОСТИКИ
-            const uniquePrizes = this.rouletteCards.length; // = 4 сейчас
-            const cardWidth = 175; // px
-            const containerWidth = 1200; // px из диагностики
-            const visibleCards = Math.floor(containerWidth / cardWidth); // 1200/175 ≈ 6.8 → 6 карт видно
+            const uniquePrizes = this.rouletteCards.length;
+            const cardWidth = 175;
+            const containerWidth = 1200;
             
             // ИНДЕКС ПОБЕДИТЕЛЯ
             const prizeIndex = Math.floor(Math.random() * uniquePrizes);
             this.winningPrize = this.rouletteCards[prizeIndex];
             
             console.log('🎯 Выигрышный приз индекс:', prizeIndex);
-            console.log('🎯 Название:', this.winningPrize.name);
-            console.log('📊 Видно карт:', visibleCards);
 
-            // РАСЧЕТ ПОЗИЦИИ
-            const copiesCount = 5; // Используем 5 копий как в initRoulette
+            // РАСЧЕТ ПОЗИЦИИ (упрощенный и надежный)
+            const copiesCount = 5;
             
-            // Индекс карты в среднем наборе (копия №2)
-            const targetCopyIndex = 2;
+            // Индекс карты в треке (используем 3-ю копию для надежности)
+            const targetCopyIndex = 2; // 0,1,2,3,4 - берем центральную
             const targetCardIndex = (targetCopyIndex * uniquePrizes) + prizeIndex;
             
-            // КАРТА ДОЛЖНА БЫТЬ 4-Й ПО СЧЕТУ (чтобы быть под стрелкой)
-            const desiredPosition = 4;
+            // Карта должна быть 5-й по счету (чуть левее центра для надежности)
+            const desiredPosition = 5;
             
-            // Шаги до цели
+            // Шаги до цели с запасом
             let stepsToTarget = targetCardIndex - desiredPosition;
             
-            // Добавляем 3 полных оборота
-            const fullRotationSteps = copiesCount * uniquePrizes; // Полный оборот (все копии)
-            const totalSteps = (3 * fullRotationSteps) + stepsToTarget;
+            // 4 полных оборота для красивой анимации
+            const fullRotationSteps = copiesCount * uniquePrizes;
+            const totalSteps = (4 * fullRotationSteps) + stepsToTarget;
             
-            // Итоговая позиция в пикселях
             const targetPosition = -(totalSteps * cardWidth);
             
-            console.log(`📊 totalSteps: ${totalSteps}, targetPosition: ${targetPosition}px`);
+            console.log(`📊 targetPosition: ${targetPosition}px`);
 
-            // ЗАПУСК АНИМАЦИИ
-            track.style.transition = 'transform 4s cubic-bezier(0.1, 0.9, 0.2, 1)';
-            track.style.transform = `translateX(${targetPosition}px)`;
+            // === НОВАЯ УЛУЧШЕННАЯ АНИМАЦИЯ ===
+            
+            // 1. Сначала быстро разгоняемся
+            track.style.transition = 'transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
+            track.style.transform = `translateX(${targetPosition * 0.3}px)`;
+            
+            // 2. Через 0.8 секунды добавляем основное вращение с замедлением
+            setTimeout(() => {
+                track.style.transition = 'transform 2.5s cubic-bezier(0.0, 0.0, 0.2, 1)';
+                track.style.transform = `translateX(${targetPosition}px)`;
+            }, 800);
+            
+            // 3. Еще через 2.5 секунды добавляем финальное замедление
+            setTimeout(() => {
+                track.style.transition = 'transform 0.7s cubic-bezier(0.0, 0.0, 0.0, 1)';
+                track.style.transform = `translateX(${targetPosition}px)`;
+            }, 3300);
 
+            // Ждем полного окончания анимации (4 секунды)
             setTimeout(async () => {
                 try {
                     const response = await fetch('/api/draw', {
@@ -416,8 +427,9 @@ class ShadowRaffleGame {
                         await this.loadPrizes();
                         await this.loadPublicWinners();
                         
+                        // Плавный возврат
                         setTimeout(() => {
-                            track.style.transition = 'transform 0.5s ease';
+                            track.style.transition = 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)';
                             track.style.transform = 'translateX(0)';
                             
                             setTimeout(() => {
@@ -425,18 +437,18 @@ class ShadowRaffleGame {
                                 if (this.rouletteCards.length > 0) {
                                     this.initRoulette();
                                 }
-                            }, 500);
+                            }, 600);
                         }, 300);
                         
                     } else {
                         this.showMessage(data.message, 'error');
-                        track.style.transition = 'transform 0.5s ease';
+                        track.style.transition = 'transform 0.6s ease';
                         track.style.transform = 'translateX(0)';
                     }
                 } catch (error) {
                     console.error('Ошибка:', error);
                     this.showMessage('Ошибка при розыгрыше', 'error');
-                    track.style.transition = 'transform 0.5s ease';
+                    track.style.transition = 'transform 0.6s ease';
                     track.style.transform = 'translateX(0)';
                 } finally {
                     this.isSpinning = false;
