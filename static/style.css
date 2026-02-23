@@ -898,6 +898,17 @@ a:hover {
     margin: 30px auto 20px; /* Увеличиваем верхний отступ для указателя */
     /* остальные стили уже есть */
 }
+/* Стиль для пустой рулетки */
+.roulette-empty {
+    width: 100%;
+    text-align: center;
+    padding: 40px;
+    color: #ffaa00;
+    font-size: 1.5em;
+    text-shadow: 0 0 15px #ffaa00;
+    background: rgba(20, 20, 30, 0.5);
+    border-radius: 10px;
+}
 
 .roulette-wrapper {
     position: relative;
