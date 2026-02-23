@@ -359,32 +359,68 @@ class ShadowRaffleGame {
             spinBtn.disabled = true;
             spinBtn.textContent = '🎰 Крутим... 🎰';
 
-            // ПОЛУЧАЕМ СЛУЧАЙНЫЙ ПРИЗ ДЛЯ ВЫИГРЫША
+            // ПОЛУЧАЕМ СЛУЧАЙНЫЙ ПРИЗ
             const prizeIndex = Math.floor(Math.random() * this.rouletteCards.length);
             this.winningPrize = this.rouletteCards[prizeIndex];
             
-            console.log('🎯 Выигрышный приз:', prizeIndex, this.winningPrize.name);
+            console.log('🎯 Выигрышный приз индекс:', prizeIndex);
+            console.log('🎯 Название:', this.winningPrize.name);
+            console.log('📊 Всего призов:', this.rouletteCards.length);
 
-            // ПРОСТОЙ РАСЧЕТ
+            // КОНСТАНТЫ
             const cardWidth = 175; // 160px + 15px gap
+            const copiesCount = 5; // Сколько копий в рулетке
             
-            // Мы хотим, чтобы выигрышный приз оказался 8-м по счету (примерно по центру)
-            // Используем фиксированное смещение
-            const basePosition = - (5 * this.rouletteCards.length * cardWidth); // Отступаем на 5 наборов влево
+            // ДИНАМИЧЕСКИЙ РАСЧЕТ
+            const cardsPerSet = this.rouletteCards.length; // Количество уникальных призов
             
-            // Добавляем смещение до нужной карты
-            const targetOffset = prizeIndex * cardWidth;
+            // ВЫБИРАЕМ ЦЕЛЕВУЮ КОПИЮ (всегда используем среднюю для надежности)
+            // При 5 копиях: 0,1,2,3,4 - берем индекс 2
+            const targetCopyIndex = Math.floor(copiesCount / 2); // Всегда 2 при 5 копиях
             
-            // Итоговая позиция
-            const targetPosition = basePosition - targetOffset;
+            // Индекс карты в треке = (номер копии * кол-во призов) + индекс приза
+            const targetCardIndexInTrack = (targetCopyIndex * cardsPerSet) + prizeIndex;
             
-            console.log(`📊 Позиция: ${targetPosition}`);
+            console.log(`📊 Индекс в треке: ${targetCardIndexInTrack}`);
+            
+            // Получаем ширину контейнера для центрирования
+            const container = track.parentElement;
+            const containerWidth = container.offsetWidth;
+            
+            // Центрируем карту: чтобы карта с индексом targetCardIndexInTrack была по центру
+            // Формула: -(индекс * ширина) + (ширина контейнера/2 - ширина карты/2)
+            let centerPosition = -(targetCardIndexInTrack * cardWidth) + (containerWidth / 2 - cardWidth / 2);
+            
+            console.log(`📊 Позиция для центрирования: ${centerPosition}`);
+            
+            // Добавляем случайные обороты
+            // Полный оборот = все 5 копий * количество призов * ширину
+            const fullSpinDistance = copiesCount * cardsPerSet * cardWidth;
+            
+            // 2-4 полных оборота для плавности
+            const spinCount = 2 + Math.floor(Math.random() * 3); // 2, 3 или 4
+            const extraSpinDistance = spinCount * fullSpinDistance;
+            
+            console.log(`📊 Оборотов: ${spinCount}, дистанция: ${extraSpinDistance}`);
+            
+            // Итоговая позиция (двигаемся влево, поэтому минус)
+            const targetPosition = centerPosition - extraSpinDistance;
+            
+            console.log(`📊 Финальная позиция: ${targetPosition}`);
+
+            // ПРОВЕРКА: не уедем ли мы слишком далеко?
+            // Максимально возможная позиция (чтобы не уехать за пределы 5 копий)
+            const maxPosition = -(copiesCount * cardsPerSet * cardWidth * 2); // Запас в 2 раза
+            
+            if (targetPosition < maxPosition) {
+                console.log('⚠️ Позиция скорректирована');
+                targetPosition = maxPosition;
+            }
 
             // ЗАПУСКАЕМ АНИМАЦИЮ
-            track.style.transition = 'transform 3s cubic-bezier(0.2, 0.9, 0.3, 1)';
+            track.style.transition = 'transform 4s cubic-bezier(0.1, 0.9, 0.2, 1)';
             track.style.transform = `translateX(${targetPosition}px)`;
 
-            // Ждем окончания анимации
             setTimeout(async () => {
                 try {
                     const response = await fetch('/api/draw', {
@@ -409,29 +445,35 @@ class ShadowRaffleGame {
                         await this.loadPrizes();
                         await this.loadPublicWinners();
                         
-                        // Возвращаем рулетку в начало
+                        // Плавно возвращаем в начало
                         setTimeout(() => {
-                            track.style.transition = 'none';
+                            track.style.transition = 'transform 0.5s ease';
                             track.style.transform = 'translateX(0)';
-                            this.initRoulette(); // Пересоздаем с новыми призами
+                            
+                            setTimeout(() => {
+                                track.style.transition = 'none';
+                                if (this.rouletteCards.length > 0) {
+                                    this.initRoulette();
+                                }
+                            }, 500);
                         }, 300);
                         
                     } else {
                         this.showMessage(data.message, 'error');
-                        track.style.transition = 'none';
+                        track.style.transition = 'transform 0.5s ease';
                         track.style.transform = 'translateX(0)';
                     }
                 } catch (error) {
                     console.error('Ошибка:', error);
                     this.showMessage('Ошибка при розыгрыше', 'error');
-                    track.style.transition = 'none';
+                    track.style.transition = 'transform 0.5s ease';
                     track.style.transform = 'translateX(0)';
                 } finally {
                     this.isSpinning = false;
                     spinBtn.disabled = false;
                     spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
                 }
-            }, 3000);
+            }, 4000);
         }
 
         async loadUserWins() {
