@@ -325,108 +325,109 @@ class ShadowRaffleGame {
     }
 
         async spinRoulette() {
-            // --- Блок проверок (остается без изменений) ---
             if (this.isSpinning) {
                 this.showMessage('Рулетка уже крутится!', 'error');
                 return;
             }
+
             if (!this.currentUser || this.currentUser.shadow_coins < 1) {
                 this.showMessage('Недостаточно монет!', 'error');
                 return;
             }
+
             const spinBtn = document.getElementById('spinButton');
             const track = document.getElementById('rouletteTrack');
+
             if (!track) {
                 this.showMessage('Ошибка загрузки рулетки', 'error');
                 return;
             }
+
             if (!this.rouletteCards || this.rouletteCards.length === 0) {
                 this.showMessage('Все призы разыграны!', 'error');
                 spinBtn.disabled = true;
                 spinBtn.textContent = '🎰 ПРИЗЫ ЗАКОНЧИЛИСЬ 🎰';
                 return;
             }
-            // ------------------------------------------------
 
             this.isSpinning = true;
             spinBtn.disabled = true;
             spinBtn.textContent = '🎰 Крутим... 🎰';
 
-            // --- НОВАЯ ЛОГИКА РАСЧЕТА ---
-            const uniquePrizeCount = this.rouletteCards.length; // Сколько всего разных призов (например, 5)
-            const cardWidth = 175; // Ширина карты + gap
+            // ДАННЫЕ ИЗ ДИАГНОСТИКИ
+            const uniquePrizes = this.rouletteCards.length; // = 4 сейчас
+            const cardWidth = 175; // px
+            const containerWidth = 1200; // px из диагностики
+            const visibleCards = Math.floor(containerWidth / cardWidth); // 1200/175 ≈ 6.8 → 6 карт видно
             
-            // 1. ВЫБИРАЕМ ПОБЕДИТЕЛЯ
-            const winningPrizeIndex = Math.floor(Math.random() * uniquePrizeCount);
-            this.winningPrize = this.rouletteCards[winningPrizeIndex];
-            console.log(`🎯 Победитель: индекс=${winningPrizeIndex}, карта=${this.winningPrize.name}`);
-
-            // 2. РАБОТА С КОПИЯМИ. Всегда используем 3 копии для простоты.
-            const copiesCount = 3;
-            // Индекс нашей целевой копии. Берем среднюю (индекс 1, т.к. копии: 0,1,2).
-            const targetCopyIndex = 1; 
-
-            // 3. ВЫЧИСЛЯЕМ ЦЕЛЕВОЙ ИНДЕКС КАРТЫ В ТРЕКЕ.
-            // Это номер карты в длинном треке из 3-х копий, на которой мы хотим остановиться.
-            // Например, если призов 5, и победитель с индексом 2, то целевой индекс = (1*5) + 2 = 7.
-            const targetCardIndex = (targetCopyIndex * uniquePrizeCount) + winningPrizeIndex;
-
-            // 4. РАССЧИТЫВАЕМ, В КАКОЙ "ВИДИМОЙ" ПОЗИЦИИ ДОЛЖНА БЫТЬ ЭТА КАРТА.
-            // Мы хотим, чтобы целевая карта оказалась 4-й по счету в видимой области (примерно по центру).
-            // Это число 4 подобрано опытным путем и должно хорошо работать для разных ширин экрана.
-            const targetVisiblePosition = 4; 
-
-            // 5. ВЫЧИСЛЯЕМ НУЖНОЕ СМЕЩЕНИЕ.
-            // На сколько карт нужно подвинуть трек, чтобы целевая карта оказалась на targetVisiblePosition позиции.
-            // Если бы мы начинали с позиции 0, то для этого нужно было бы сдвинуться на (targetCardIndex - targetVisiblePosition) карт.
-            // Но мы сначала сделаем 3 полных оборота, поэтому добавим это смещение после оборотов.
-            let stepsToTarget = targetCardIndex - targetVisiblePosition;
-
-            // 6. ДОБАВЛЯЕМ ПОЛНЫЕ ОБОРОТЫ.
-            // Делаем 3 полных оборота. Полный оборот — это прокрутка всех 3-х копий (totalCardsInTrack).
-            const totalCardsInTrack = copiesCount * uniquePrizeCount;
-            const fullRotations = 3; 
-            // Мы должны прокрутить fullRotations * totalCardsInTrack + stepsToTarget карт.
-            const totalSteps = (fullRotations * totalCardsInTrack) + stepsToTarget;
+            // ИНДЕКС ПОБЕДИТЕЛЯ
+            const prizeIndex = Math.floor(Math.random() * uniquePrizes);
+            this.winningPrize = this.rouletteCards[prizeIndex];
             
-            // 7. ПЕРЕВОДИМ ШАГИ В ПИКСЕЛИ.
+            console.log('🎯 Выигрышный приз индекс:', prizeIndex);
+            console.log('🎯 Название:', this.winningPrize.name);
+            console.log('📊 Видно карт:', visibleCards);
+
+            // РАСЧЕТ ПОЗИЦИИ
+            const copiesCount = 5; // Используем 5 копий как в initRoulette
+            
+            // Индекс карты в среднем наборе (копия №2)
+            const targetCopyIndex = 2;
+            const targetCardIndex = (targetCopyIndex * uniquePrizes) + prizeIndex;
+            
+            // КАРТА ДОЛЖНА БЫТЬ 4-Й ПО СЧЕТУ (чтобы быть под стрелкой)
+            const desiredPosition = 4;
+            
+            // Шаги до цели
+            let stepsToTarget = targetCardIndex - desiredPosition;
+            
+            // Добавляем 3 полных оборота
+            const fullRotationSteps = copiesCount * uniquePrizes; // Полный оборот (все копии)
+            const totalSteps = (3 * fullRotationSteps) + stepsToTarget;
+            
+            // Итоговая позиция в пикселях
             const targetPosition = -(totalSteps * cardWidth);
             
             console.log(`📊 totalSteps: ${totalSteps}, targetPosition: ${targetPosition}px`);
 
-            // --- ЗАПУСК АНИМАЦИИ (остается почти без изменений) ---
-            track.style.transition = 'transform 5s cubic-bezier(0.1, 0.8, 0.3, 1)'; // Увеличил до 5 сек
+            // ЗАПУСК АНИМАЦИИ
+            track.style.transition = 'transform 4s cubic-bezier(0.1, 0.9, 0.2, 1)';
             track.style.transform = `translateX(${targetPosition}px)`;
 
             setTimeout(async () => {
-                // --- Обработка ответа от сервера (остается без изменений) ---
                 try {
                     const response = await fetch('/api/draw', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
                         body: JSON.stringify({ user_id: this.currentUser.id })
                     });
+                    
                     const data = await response.json();
-
+                    
                     if (data.success) {
                         this.currentUser.shadow_coins = data.new_balance;
                         localStorage.setItem('shadowUser', JSON.stringify(this.currentUser));
                         document.getElementById('userCoins').textContent = data.new_balance;
+                        
                         this.showWinModal(data.prize);
-
+                        
                         await this.loadPrizes();
                         await this.loadPublicWinners();
-
-                        // Плавно возвращаем рулетку в начало
+                        
                         setTimeout(() => {
                             track.style.transition = 'transform 0.5s ease';
                             track.style.transform = 'translateX(0)';
+                            
                             setTimeout(() => {
                                 track.style.transition = 'none';
-                                if (this.rouletteCards.length > 0) this.initRoulette();
+                                if (this.rouletteCards.length > 0) {
+                                    this.initRoulette();
+                                }
                             }, 500);
                         }, 300);
-
+                        
                     } else {
                         this.showMessage(data.message, 'error');
                         track.style.transition = 'transform 0.5s ease';
@@ -442,7 +443,7 @@ class ShadowRaffleGame {
                     spinBtn.disabled = false;
                     spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
                 }
-            }, 5000); // Увеличил таймаут до 5 секунд
+            }, 4000);
         }
 
         async loadUserWins() {
