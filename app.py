@@ -495,6 +495,80 @@ def get_user_data():
         print(f"🔥 Ошибка: {e}")
         return jsonify({'success': False, 'message': str(e)})   
     
+@app.route('/api/update_profile', methods=['POST'])
+def update_profile():
+    """Обновить данные профиля пользователя"""
+    data = request.get_json()
+    user_id = data.get('user_id')
+    nickname = data.get('nickname')
+    telegram = data.get('telegram')
+    site_url = data.get('site_url')
+    
+    if not user_id:
+        return jsonify({'success': False, 'message': 'Пользователь не найден'})
+    
+    # Проверка ника
+    if nickname:
+        if len(nickname) < 3:
+            return jsonify({'success': False, 'message': 'Никнейм должен быть не менее 3 символов'})
+        if len(nickname) > 20:
+            return jsonify({'success': False, 'message': 'Никнейм должен быть не более 20 символов'})
+    
+    # Проверка Telegram
+    if telegram and len(telegram) > 15:
+        return jsonify({'success': False, 'message': 'Telegram не может быть длиннее 15 символов'})
+    
+    # Проверка ссылки Remanga
+    if site_url:
+        import re
+        remanga_regex = r'^https://remanga\.org/user/[0-9]+/about$'
+        if not re.match(remanga_regex, site_url):
+            return jsonify({'success': False, 'message': 'Неверный формат ссылки Remanga'})
+        if len(site_url) > 100:
+            return jsonify({'success': False, 'message': 'Ссылка слишком длинная'})
+    
+    # Обновляем в базе данных
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        
+        if nickname:
+            # Проверяем, не занят ли ник
+            cursor.execute("SELECT id FROM users WHERE nickname = ? AND id != ?", (nickname, user_id))
+            if cursor.fetchone():
+                return jsonify({'success': False, 'message': 'Никнейм уже занят'})
+            cursor.execute("UPDATE users SET nickname = ? WHERE id = ?", (nickname, user_id))
+        
+        if telegram is not None:
+            if telegram:
+                cursor.execute("SELECT id FROM users WHERE telegram = ? AND id != ?", (telegram, user_id))
+                if cursor.fetchone():
+                    return jsonify({'success': False, 'message': 'Telegram уже используется'})
+            cursor.execute("UPDATE users SET telegram = ? WHERE id = ?", (telegram, user_id))
+        
+        if site_url is not None:
+            if site_url:
+                cursor.execute("SELECT id FROM users WHERE site_url = ? AND id != ?", (site_url, user_id))
+                if cursor.fetchone():
+                    return jsonify({'success': False, 'message': 'Ссылка уже используется'})
+            cursor.execute("UPDATE users SET site_url = ? WHERE id = ?", (site_url, user_id))
+        
+        conn.commit()
+        
+        # Возвращаем обновлённые данные
+        cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        
+        return jsonify({
+            'success': True,
+            'user': {
+                'id': user[0],
+                'nickname': user[1],
+                'telegram': user[3],
+                'site_url': user[4],
+                'shadow_coins': user[5]
+            }
+        })
+    
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
