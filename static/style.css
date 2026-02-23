@@ -892,11 +892,11 @@ a:hover {
 
 /* ========== РУЛЕТКА ========== */
 .roulette-container {
+    position: relative; /* ВАЖНО */
     width: 100%;
     max-width: 1200px;
-    margin: 20px auto;
-    position: relative;
-    padding: 20px 0;
+    margin: 30px auto 20px; /* Увеличиваем верхний отступ для указателя */
+    /* остальные стили уже есть */
 }
 
 .roulette-wrapper {
@@ -926,6 +926,26 @@ a:hover {
 .roulette-wrapper::after {
     right: 0;
     background: linear-gradient(to left, rgba(10, 10, 15, 0.95), transparent);
+}
+
+.roulette-pointer {
+    position: absolute;
+    top: -15px; /* Поднимаем над рулеткой */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 40px;
+    color: #ffaa00;
+    text-shadow: 0 0 20px #ffaa00, 0 0 40px #ff5500;
+    z-index: 20;
+    filter: drop-shadow(0 0 5px black);
+    line-height: 1;
+    pointer-events: none; /* Чтобы не мешать кликам */
+    animation: pointerGlow 1.5s infinite alternate;
+}
+
+@keyframes pointerGlow {
+    from { text-shadow: 0 0 15px #ffaa00, 0 0 30px #ff5500; }
+    to { text-shadow: 0 0 25px #ffaa00, 0 0 50px #ff5500; }
 }
 
 .roulette-track {

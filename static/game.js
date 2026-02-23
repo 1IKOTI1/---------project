@@ -106,31 +106,35 @@ class ShadowRaffleGame {
         }
     }
     
-    getGameHTML() {
-        return `
-            <div class="roulette-container">
-                <div class="roulette-wrapper">
-                    <div class="roulette-track" id="rouletteTrack"></div>
+            getGameHTML() {
+            return `
+                <div class="roulette-container">
+                    <!-- Добавляем указатель над рулеткой -->
+                    <div class="roulette-pointer">▼</div>
+                    
+                    <div class="roulette-wrapper">
+                        <div class="roulette-track" id="rouletteTrack"></div>
+                    </div>
+                    
+                    <button id="spinButton" class="spin-btn">
+                        🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑
+                    </button>
                 </div>
-                <button id="spinButton" class="spin-btn">
-                    🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑
-                </button>
-            </div>
-            
-            <div class="prizes-section">
-                <h2>🎲 Доступные карты</h2>
-                <div class="prizes-scroll">
-                    <div id="prizesGrid" class="prizes-grid"></div>
+                
+                <div class="prizes-section">
+                    <h2>🎲 Доступные карты</h2>
+                    <div class="prizes-scroll">
+                        <div id="prizesGrid" class="prizes-grid"></div>
+                    </div>
                 </div>
-            </div>
+                
+                <div class="public-winners">
+                    <h3>🏆 Последние победители</h3>
+                    <div id="publicWinners"></div>
+                </div>
+            `;
+        }
             
-            <div class="public-winners">
-                <h3>🏆 Последние победители</h3>
-                <div id="publicWinners"></div>
-            </div>
-        `;
-    }
-    
     getWinsHTML() {
         return `
             <h2>🏆 Мои выигрыши</h2>
@@ -274,91 +278,78 @@ class ShadowRaffleGame {
     }
 
         async spinRoulette() {
-        if (this.isSpinning) {
-            this.showMessage('Рулетка уже крутится!', 'error');
-            return;
-        }
-        
-        if (!this.currentUser || this.currentUser.shadow_coins < 1) {
-            this.showMessage('Недостаточно монет!', 'error');
-            return;
-        }
-        
-        const spinBtn = document.getElementById('spinButton');
-        const track = document.getElementById('rouletteTrack');
-        
-        if (!track || this.rouletteCards.length === 0) {
-            this.showMessage('Нет доступных призов', 'error');
-            return;
-        }
-        
-        this.isSpinning = true;
-        spinBtn.disabled = true;
-        spinBtn.textContent = '🎰 Крутим... 🎰';
-        
-        // Получаем случайный приз для выигрыша
-        const prizeIndex = Math.floor(Math.random() * this.rouletteCards.length);
-        this.winningPrize = this.rouletteCards[prizeIndex];
-        
-        // Рассчитываем позицию остановки (центрируем выигрышный приз)
-        const cardWidth = 175; // 160px ширина + 15px gap
-        const targetPosition = -(prizeIndex + this.rouletteCards.length) * cardWidth + 400;
-        
-        // Анимация прокрутки
-        track.style.transition = 'transform 3s cubic-bezier(0.2, 0.9, 0.3, 1)';
-        track.style.transform = `translateX(${targetPosition}px)`;
-        
+            if (this.isSpinning) {
+                this.showMessage('Рулетка уже крутится!', 'error');
+                return;
+            }
+
+            if (!this.currentUser || this.currentUser.shadow_coins < 1) {
+                this.showMessage('Недостаточно монет!', 'error');
+                return;
+            }
+
+            const spinBtn = document.getElementById('spinButton');
+            const track = document.getElementById('rouletteTrack');
+
+            if (!track || this.rouletteCards.length === 0) {
+                this.showMessage('Нет доступных призов', 'error');
+                return;
+            }
+
+            this.isSpinning = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = '🎰 Крутим... 🎰';
+
+            // Получаем случайный приз для выигрыша
+            const prizeIndex = Math.floor(Math.random() * this.rouletteCards.length);
+            this.winningPrize = this.rouletteCards[prizeIndex];
+
+            // *** НОВЫЙ РАСЧЕТ ПОЗИЦИИ ***
+            const cardWidth = 175; // 160px ширина + 15px gap (должно совпадать с CSS)
+            // Индекс в треке (используем 3 копии, как при инициализации)
+            // Хотим, чтобы выигрышный приз оказался под указателем.
+            // Указатель по центру. Сдвигаем трек так, чтобы центр выигрышной карты был по центру.
+            // targetIndex = prizeIndex + totalCards (чтобы приз был из среднего блока)
+            const targetCardIndex = prizeIndex + this.rouletteCards.length; 
+            // Позиция: смещение влево на (индекс * ширину) - (половина ширины контейнера) + (половина ширины карты)
+            // Упрощенный вариант: центрируем 4-ю карту (индекс 3) для наглядности, но нам нужно по формуле.
+            // Лучше: targetPosition = -(targetCardIndex * cardWidth) + (containerWidth/2 - cardWidth/2);
+            const container = track.parentElement; // .roulette-wrapper
+            const containerWidth = container.offsetWidth;
+            // Целевая позиция, чтобы карта с индексом targetCardIndex оказалась в центре
+            let targetPosition = -(targetCardIndex * cardWidth) + (containerWidth / 2 - cardWidth / 2);
+
+            // Добавляем случайное количество полных оборотов (например, 3-5 оборотов)
+            const extraSpins = 3 * this.rouletteCards.length * cardWidth; // 3 полных круга
+            targetPosition -= extraSpins; // Крутим влево
+
+            console.log(`Spin: target index=${targetCardIndex}, position=${targetPosition}`);
+
+            // Применяем анимацию
+            track.style.transition = 'transform 3s cubic-bezier(0.2, 0.9, 0.3, 1)';
+            track.style.transform = `translateX(${targetPosition}px)`;
+
         // Ждем окончания анимации
         setTimeout(async () => {
-            try {
-                // Отправляем запрос на сервер для розыгрыша
-                const response = await fetch('/api/draw', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ user_id: this.currentUser.id })
-                });
+            // ... (весь код запроса к серверу и обработки ответа)
+            // После успешного ответа:
+            if (data.success) {
+                // ... обновление данных ...
+                this.showWinModal(data.prize);
+                // ... загрузка призов ...
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Обновляем баланс
-                    this.currentUser.shadow_coins = data.new_balance;
-                    localStorage.setItem('shadowUser', JSON.stringify(this.currentUser));
-                    document.getElementById('userCoins').textContent = data.new_balance;
-                    
-                    // Показываем модальное окно с выигрышем
-                    this.showWinModal(data.prize);
-                    
-                    // Обновляем список призов
-                    await this.loadPrizes();
-                    await this.loadPublicWinners();
-                    
-                    // Сбрасываем рулетку
-                    setTimeout(() => {
-                        track.style.transition = 'none';
-                        track.style.transform = 'translateX(0)';
-                        this.initRoulette();
-                    }, 500);
-                    
-                } else {
-                    this.showMessage(data.message, 'error');
-                    // Сбрасываем рулетку
+                // Сбрасываем рулетку на исходную (мгновенно)
+                setTimeout(() => {
                     track.style.transition = 'none';
                     track.style.transform = 'translateX(0)';
-                }
-            } catch (error) {
-                console.error('Ошибка:', error);
-                this.showMessage('Ошибка при розыгрыше', 'error');
-                track.style.transition = 'none';
-                track.style.transform = 'translateX(0)';
-            } finally {
-                this.isSpinning = false;
-                spinBtn.disabled = false;
-                spinBtn.textContent = '🌑 КРУТИТЬ РУЛЕТКУ (1 теневая монета) 🌑';
+                    this.initRoulette(); // Пересоздаем трек
+                }, 500);
+                
+            } else {
+                // ... обработка ошибки ...
             }
-        }, 3000);
+            // ... finally ...
+        }, 3000); // Время анимации
     }
 
         async loadUserWins() {
